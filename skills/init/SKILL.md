@@ -54,13 +54,24 @@ Scan the project root and detect:
 
 After displaying what you detected, ask targeted questions to fill gaps. Always ask ONE question, wait for the answer, then ask the next.
 
-Suggested question flow (skip any already answered by detection):
+Suggested question flow (skip any already answered by detection). **Every question MUST use numbered choices — never open-ended.**
 
-1. "I detected [stack]. Is this correct? Are there other internal repositories this project depends on?"
-2. "I identified [architecture pattern]. Does this match your understanding?"
+1. "I detected [stack]. Is this correct?"
+   - 1. Correct, no other dependencies
+   - 2. Correct, but there are other internal repos (please list)
+   - 3. Needs correction (please specify)
+2. "I identified [architecture pattern]. Does this match?"
+   - 1. Yes
+   - 2. Not exactly (please describe)
 3. "For issue tracking, I detected [tracker]. Is this where issues should be created?"
-4. "What level of autonomy do you want for automated fixes? (a) Full auto — branch, fix, test, PR (b) Semi-auto — propose fix, wait for approval, then PR"
-5. **Only if "full auto" was chosen in Q4**: "Do you want to allow Claude to execute all operations without asking permission (file edits, shell commands, etc.)? ⚠️ WARNING: This grants full access to read, write, and execute anything in this project directory. This is convenient for autonomous work but removes all safety prompts. (a) Yes — generate `.claude/settings.json` with full permissions (b) No — I'll approve operations manually"
+   - 1. Yes
+   - 2. No, I use [other] (please specify)
+4. "What level of autonomy do you want for automated fixes?"
+   - 1. Full auto — branch, fix, test, PR without asking (Recommended)
+   - 2. Semi-auto — propose changes, wait for approval
+5. **Only if "full auto" was chosen in Q4**: "Do you want to allow Claude to execute all operations without asking permission? ⚠️ This grants full access to read, write, and execute anything in this project directory."
+   - 1. Yes — full access (Recommended for full auto)
+   - 2. No — I'll approve operations manually
    - If (a): **CREATE `.claude/settings.json` IMMEDIATELY** — do not wait for Phase 3. This file must be written right now so that all subsequent file operations during init are auto-approved:
      ```json
      {
