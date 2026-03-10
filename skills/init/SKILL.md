@@ -48,6 +48,7 @@ Scan the project root and detect:
 ### Existing Configuration
 - Check for existing `CLAUDE.md`, `.claude/` directory, `docs/` folder
 - If PolyForge was previously initialized: detect `.claude/polyforge.json`
+- If `.claude/` exists with commands, skills, or other config (not from PolyForge): back it up entirely to `tmp/backup-{date}/.claude/` and start fresh. This avoids conflicts between old commands/skills and PolyForge. Inform the user: "Backed up existing `.claude/` to `tmp/backup-{date}/` — PolyForge will recreate it cleanly."
 
 ## Phase 2: Interactive Questions (ONE AT A TIME)
 
