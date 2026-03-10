@@ -1,0 +1,26 @@
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
+
+## Stack
+{{STACK_SUMMARY}}
+
+## Commands
+- Build: `{{BUILD_COMMAND}}`
+- Test: `{{TEST_COMMAND}}`
+- Lint: `{{LINT_COMMAND}}`
+- Dev server: `{{DEV_COMMAND}}`
+
+## Architecture
+{{ARCHITECTURE_SUMMARY}}
+
+## Conventions
+{{CONVENTIONS}}
+
+## Key References
+- Architecture details: @docs/CONTEXT.md
+{{#HAS_DB}}- Database schema: @docs/DB.md{{/HAS_DB}}
+
+## PolyForge
+Config: `.claude/polyforge.json`
+Available commands: /init, /pr-review, /analyse-db, /analyse-code, /report-issue, /fix, /fix-ci, /brainstorm, /generate-doc

@@ -1,0 +1,46 @@
+{
+  "name": "polyforge",
+  "version": "0.1.0",
+  "description": "Self-adaptive Claude Code plugin for automated software development workflows",
+  "bin": {
+    "polyforge": "./bin/polyforge.js"
+  },
+  "scripts": {
+    "test": "node --test tests/**/*.test.js",
+    "polyforge": "node bin/polyforge.js"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "ai",
+    "developer-tools",
+    "code-review",
+    "automation",
+    "skills",
+    "workflow"
+  ],
+  "author": "kiloumap",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vekta/polyforge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Vekta/polyforge/issues"
+  },
+  "homepage": "https://github.com/Vekta/polyforge#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "module",
+  "files": [
+    "bin/",
+    "skills/",
+    "rules/",
+    "hooks/",
+    "templates/",
+    "LICENSE"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
