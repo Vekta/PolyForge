@@ -148,7 +148,7 @@ Generate based on detected stack. Include:
 - `@` references to detailed docs
 - Key conventions detected
 - PolyForge commands (use these exact names):
-  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`
+  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`
 
 If a `CLAUDE.md` already exists:
 - Ask: "A CLAUDE.md already exists. (a) Merge PolyForge config into it (b) Keep it and create `.claude/rules/polyforge.md` instead (c) Replace it (backup saved to `tmp/`)"
@@ -166,7 +166,7 @@ Create if missing. Add to `.gitignore` if not already there.
 
 - After generating all config files, present a summary of what was created and their locations
 - End the summary with: "**Restart Claude Code** to load the new configuration (settings, rules, and permissions take effect on session start)."
-- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc` — never prefix with `polyforge-`
+- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash` — never prefix with `polyforge-`
 - Do not keep raw scan data in context — extract what's needed and discard
 
 ## Important Behaviors

@@ -40,6 +40,7 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 | `/fix-ci` | Diagnose and fix CI/CD failures — loops max 3 times then reports |
 | `/brainstorm` | Free-form brainstorming — produces action plan with parallelizable tasks |
 | `/generate-doc` | Generate/update Claude-optimized documentation (CLAUDE.md, docs, rules) |
+| `/squash` | Clean up commit history — regroup messy commits into logical units before PR |
 
 ## How It Works
 
