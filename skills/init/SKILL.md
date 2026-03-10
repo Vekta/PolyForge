@@ -65,7 +65,7 @@ Scan the project root and detect:
 
 After displaying what you detected, ask targeted questions to fill gaps. Always ask ONE question, wait for the answer, then ask the next.
 
-**IMPORTANT: Use the `AskUserQuestion` tool for EVERY question.** Provide predefined choices via the `options` parameter so the user can select with a single click. Only add a free-text option when necessary (e.g., "Needs correction").
+**IMPORTANT: Present every question with numbered choices.** The user should be able to answer with just a number. Only add a free-text option when necessary (e.g., "Needs correction").
 
 Suggested question flow (skip any already answered by detection):
 
@@ -148,7 +148,7 @@ Generate based on detected stack. Include:
 - `@` references to detailed docs
 - Key conventions detected
 - PolyForge commands (use these exact names):
-  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`
+  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`, `/add-rule`
 
 If a `CLAUDE.md` already exists:
 - Ask: "A CLAUDE.md already exists. (a) Merge PolyForge config into it (b) Keep it and create `.claude/rules/polyforge.md` instead (c) Replace it (backup saved to `tmp/`)"
@@ -166,7 +166,7 @@ Create if missing. Add to `.gitignore` if not already there.
 
 - After generating all config files, present a summary of what was created and their locations
 - End the summary with: "**Restart Claude Code** to load the new configuration (settings, rules, and permissions take effect on session start)."
-- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash` — never prefix with `polyforge-`
+- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`, `/add-rule` — never prefix with `polyforge-`
 - Do not keep raw scan data in context — extract what's needed and discard
 
 ## Important Behaviors

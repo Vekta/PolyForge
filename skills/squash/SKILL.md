@@ -43,7 +43,7 @@ Commits in the **Cleanup** category should ALWAYS be squashed into the parent co
 
 ### Step 3: Propose a Plan
 
-Present the reorganization plan using `AskUserQuestion` with options:
+Present the reorganization plan with numbered options:
 
 ```
 Current: 18 commits
@@ -89,7 +89,7 @@ git add <test files> && git commit -m "test: ..."
 git add <doc files> && git commit -m "docs: ..."
 ```
 
-If files don't map cleanly (same file modified across multiple logical changes), use `git add -p` to stage hunks selectively.
+If files don't map cleanly (same file modified across multiple logical changes), split changes by editing files to isolate each group, commit, then restore the remaining changes.
 
 ### Step 5: Verify
 

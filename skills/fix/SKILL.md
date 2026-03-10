@@ -105,7 +105,7 @@ Before creating the PR, reorganize commits into logical groups (3-7 commits max)
 
 1. `git reset --soft $(git merge-base HEAD origin/main)` to unstage all commits
 2. Re-commit in logical groups by staging files per group
-3. If files overlap across groups, use `git add -p` to stage hunks selectively
+3. If files overlap across groups, split changes by editing files to isolate each group, commit, then restore
 
 Target: each commit should be one reviewable, revertible logical unit. Absorb "fix lint", "fix type" into their parent commit — they never stand alone.
 
@@ -113,13 +113,18 @@ Alternatively, run `/squash` to do this interactively.
 
 ### Step 7: Create PR
 
-First, check if the repo has a PR template:
+**MANDATORY: Check for a PR template before creating the PR:**
 ```bash
-# Check common template locations
-cat .github/pull_request_template.md 2>/dev/null || cat .github/PULL_REQUEST_TEMPLATE.md 2>/dev/null || cat docs/pull_request_template.md 2>/dev/null
+# Check common template locations — read the FULL content
+cat .github/pull_request_template.md 2>/dev/null || cat .github/PULL_REQUEST_TEMPLATE.md 2>/dev/null || cat .github/PULL_REQUEST_TEMPLATE/*.md 2>/dev/null || cat docs/pull_request_template.md 2>/dev/null
 ```
 
-**If a PR template exists:** Use it as the base. Fill in the relevant sections (summary, type of change checkboxes, checklist items, issue links). Never remove sections — leave them empty if not applicable. Append `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` at the bottom.
+**If a PR template exists — THIS IS NON-NEGOTIABLE:**
+1. Use the template VERBATIM as the structure — keep every section, every checkbox, every HTML comment
+2. Fill in the sections with relevant content (write the summary, check applicable boxes with `[x]`, fill Jira/issue links)
+3. Leave sections empty or unchecked if not applicable — NEVER delete them
+4. Append `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` at the very bottom
+5. The PR body must look like the template was filled in by a human, not replaced by a bot
 
 **If no PR template exists:** Use this default:
 ```bash
@@ -152,13 +157,18 @@ EOF
 gh issue comment 123 --body "Fix submitted in PR #{pr-number}"
 ```
 
-**Jira:** Update issue status to "In Review" and link the PR.
+**Jira (prefer CLI if available):**
+```bash
+jira issue move {key} "In Review"
+jira issue comment add {key} "Fix submitted in PR #{pr-number}"
+```
+Fallback to REST API if `jira` CLI is not installed.
 
 ## Context Management
 
 - If the fix plan identifies independent file groups, delegate implementation of each group to a subagent
 - After the PR is created, compact the conversation — the PR is the deliverable
-- For large fixes, delegate to subagents with `isolation: worktree` to work on an isolated copy of the repo
+- For large fixes, delegate independent tasks to subagents to work in parallel
 
 ## Important Behaviors
 

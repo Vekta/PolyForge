@@ -52,34 +52,76 @@ Before creating, automatically:
 - Suggest a severity label based on analysis
 - Add reproduction context if applicable
 
-### Step 4: Create the Issue
+### Step 4: Check for Issue Templates
+
+**MANDATORY: Check for issue templates before creating:**
+
+**GitHub:**
+```bash
+# Check for issue templates
+ls .github/ISSUE_TEMPLATE/ 2>/dev/null
+cat .github/ISSUE_TEMPLATE/bug_report.md 2>/dev/null
+cat .github/ISSUE_TEMPLATE/feature_request.md 2>/dev/null
+cat .github/ISSUE_TEMPLATE/config.yml 2>/dev/null
+```
+
+**Jira:** Jira templates are server-side (issue type screens). Discover available types and required fields:
+```bash
+# List available issue types for the project
+jira issue types 2>/dev/null || curl "https://{domain}.atlassian.net/rest/api/3/issue/createmeta/{projectKey}/issuetypes" -H "Authorization: Basic {credentials}"
+
+# Check a recent issue of the same type to learn the expected format
+jira issue list --type Bug --plain --columns key,summary,priority,status -q"ORDER BY created DESC" 2>/dev/null | head -5
+jira issue view {recent-key} --raw 2>/dev/null
+```
+Use a recent issue as a reference for the expected description format (headings, sections, acceptance criteria structure). Match the team's conventions.
+
+**GitLab:**
+```bash
+ls .gitlab/issue_templates/ 2>/dev/null
+```
+
+**If a template exists — THIS IS NON-NEGOTIABLE:**
+1. Use the template VERBATIM as the structure — keep every section, every checkbox, every HTML comment
+2. Fill in all applicable fields with relevant content
+3. Leave sections empty if not applicable — NEVER delete them
+4. Append `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` at the bottom
+
+### Step 5: Create the Issue
 
 **GitHub Issues:**
 ```bash
 gh issue create \
   --title "{title}" \
-  --body "{body}" \
+  --body "{body from template}" \
   --label "{severity},{type}" \
   --assignee "{from git blame if applicable}"
 ```
 
-**Jira:**
+**Jira (preferred — via CLI):**
 ```bash
-# Use Jira API via curl or jira CLI
-# Read project key from .claude/polyforge.json → issueTracker.config.projectKey
+jira issue create \
+  --type "{Bug|Task|Story}" \
+  --summary "{title}" \
+  --body "{body}" \
+  --priority "{priority}" \
+  --label "{labels}"
+```
+
+**Jira (fallback — via REST API):**
+```bash
 curl -X POST "https://{domain}.atlassian.net/rest/api/3/issue" \
   -H "Authorization: Basic {base64(email:token)}" \
   -H "Content-Type: application/json" \
-  -d '{issue payload}'
+  -d '{issue payload respecting required fields and issue type}'
 ```
 
 **GitLab:**
 ```bash
-# Use glab CLI or GitLab API
-glab issue create --title "{title}" --description "{body}" --label "{labels}"
+glab issue create --title "{title}" --description "{body from template}" --label "{labels}"
 ```
 
-### Issue Body Template
+### Default Issue Template (only if no template exists)
 
 ```markdown
 ## Description
@@ -108,7 +150,7 @@ glab issue create --title "{title}" --description "{body}" --label "{labels}"
 *⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*
 ```
 
-### Step 5: Confirm
+### Step 6: Confirm
 
 Before creating, show the full issue preview and ask:
 "Create this issue? (y/n/edit)"
@@ -118,11 +160,24 @@ Before creating, show the full issue preview and ask:
 - In scan mode, delegate directory scanning to a subagent to preserve parent context for issue creation
 - After creating issues, compact the conversation
 
+## Jira Authentication
+
+If Jira is the tracker, check authentication in this order:
+1. **`jira` CLI** — run `jira me` to check if authenticated. If it works, **use the CLI for all Jira operations** (`jira issue create`, `jira issue list`, etc.). This is the preferred method.
+2. `JIRA_API_TOKEN` + `JIRA_EMAIL` env vars — use the REST API
+3. `JIRA_TOKEN` env var
+4. `.env` file in project root
+
+If none found, **do not ask the user to paste credentials.** Instead:
+1. Create the issue body as markdown
+2. Open the Jira create issue URL directly in browser: `open "https://{domain}.atlassian.net/secure/CreateIssue.jspa?pid={projectId}"`
+3. Tell the user: "Jira credentials not configured. I've opened Jira — paste the issue below. To enable auto-creation, add `JIRA_API_TOKEN` and `JIRA_EMAIL` to your `.env` file."
+
 ## Important Behaviors
 
 - Check for duplicate issues before creating (search existing issues by title keywords)
 - In scan mode: present all findings as a list, let user pick which to create as issues
 - Respect project labeling conventions (detect from existing issues)
 - For Jira: respect issue types (Bug, Task, Story) and required fields
-- Read credentials from environment variables — never ask the user to paste them
+- Never ask the user to paste credentials inline — read from env or .env
 - Log created issues to `tmp/issues-log-{date}.md`

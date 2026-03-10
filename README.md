@@ -43,6 +43,7 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 | `/brainstorm` | Free-form brainstorming — produces action plan with parallelizable tasks |
 | `/generate-doc` | Generate/update Claude-optimized documentation (CLAUDE.md, docs, rules) |
 | `/squash` | Clean up commit history — regroup messy commits into logical units before PR |
+| `/add-rule` | Add project rules or conventions without re-running `/forge` |
 
 ## How It Works
 
