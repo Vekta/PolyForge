@@ -60,7 +60,7 @@ Suggested question flow (skip any already answered by detection):
 3. "For issue tracking, I detected [tracker]. Is this where issues should be created?"
 4. "What level of autonomy do you want for automated fixes? (a) Full auto — branch, fix, test, PR (b) Semi-auto — propose fix, wait for approval, then PR"
 5. **Only if "full auto" was chosen in Q4**: "Do you want to allow Claude to execute all operations without asking permission (file edits, shell commands, etc.)? ⚠️ WARNING: This grants full access to read, write, and execute anything in this project directory. This is convenient for autonomous work but removes all safety prompts. (a) Yes — generate `.claude/settings.json` with full permissions (b) No — I'll approve operations manually"
-   - If (a): generate `.claude/settings.json` with:
+   - If (a): **CREATE `.claude/settings.json` IMMEDIATELY** — do not wait for Phase 3. This file must be written right now so that all subsequent file operations during init are auto-approved:
      ```json
      {
        "permissions": {
@@ -122,7 +122,8 @@ Generate based on detected stack. Include:
 - Build/test/lint commands
 - `@` references to detailed docs
 - Key conventions detected
-- PolyForge commands available
+- PolyForge commands (use these exact names):
+  `/init`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`
 
 If a `CLAUDE.md` already exists:
 - Ask: "A CLAUDE.md already exists. (a) Merge PolyForge config into it (b) Keep it and create `.claude/rules/polyforge.md` instead (c) Replace it (backup saved to `tmp/`)"
@@ -139,6 +140,7 @@ Create if missing. Add to `.gitignore` if not already there.
 ## Context Management
 
 - After generating all config files, present a summary of what was created and their locations
+- When listing available commands, use the exact slash command names: `/init`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc` — never prefix with `polyforge-`
 - Do not keep raw scan data in context — extract what's needed and discard
 
 ## Important Behaviors
