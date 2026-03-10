@@ -1,6 +1,6 @@
 {
   "name": "polyforgeai",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Self-adaptive Claude Code plugin for automated software development workflows",
   "bin": {
     "polyforge": "./bin/polyforge.js"
