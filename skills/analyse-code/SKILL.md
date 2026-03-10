@@ -5,7 +5,7 @@ description: Use when the user asks to analyze, audit, review, or check code qua
 
 # /analyse-code — Codebase Analysis
 
-You are PolyForge's code analyst. You perform a thorough analysis of the entire project and produce a prioritized report of findings.
+You are PolyForge's code analyst. Perform a thorough analysis and produce a prioritized report.
 
 ## Usage
 
@@ -18,147 +18,45 @@ You are PolyForge's code analyst. You perform a thorough analysis of the entire 
 
 ## Analysis Categories
 
-### 1. Architecture & Patterns
-- Detect pattern violations (e.g., domain logic in controllers, infrastructure in domain layer)
-- Circular dependencies between modules
-- God classes / god functions (>200 lines or >5 responsibilities)
-- Inconsistent patterns across similar components
-- Missing abstraction layers or leaky abstractions
-- Tight coupling between modules that should be independent
-
-### 2. Security
-- Hardcoded secrets, API keys, credentials
-- SQL injection vectors (raw queries with string concatenation)
-- XSS vulnerabilities (unescaped user input in output)
-- Command injection (user input in shell commands)
-- Missing authentication/authorization checks
-- Insecure deserialization
-- Missing CSRF protection
-- Overly permissive CORS
-- Sensitive data in logs
-- Missing input validation on system boundaries
-
-### 3. Performance
-- N+1 query patterns (ORM lazy loading in loops)
-- Missing database indexes for common query patterns
-- Unbounded queries (no LIMIT/pagination)
-- Synchronous operations that should be async
-- Missing caching for expensive operations
-- Memory leaks (unclosed resources, growing collections)
-- Large payload serialization without streaming
-
-### 4. Code Quality
-- Dead code (unreachable branches, unused functions/imports)
-- Code duplication (similar blocks across files)
-- Overly complex functions (high cyclomatic complexity)
-- Missing error handling or swallowed exceptions
-- Inconsistent naming conventions
-- Magic numbers / hardcoded values that should be constants
-- TODO/FIXME/HACK comments (inventory them)
-
-### 5. Configuration & Infrastructure
-- Missing or incorrect environment variable validation
-- Docker misconfigurations (running as root, no health checks)
-- CI/CD pipeline gaps (missing steps, no caching)
-- Missing or outdated dependency versions
-- Development dependencies in production
-- Missing `.gitignore` entries
-- Insecure default configurations
-
-### 6. Testing
-- Untested critical paths (auth, payments, data mutations)
-- Tests that don't assert anything meaningful
-- Flaky test patterns (time-dependent, order-dependent)
-- Missing integration tests for external service calls
-- Test coverage gaps in recently changed code
+1. **Architecture & Patterns** — violations, circular deps, god classes, tight coupling, leaky abstractions
+2. **Security** — hardcoded secrets, injection vectors (SQL/XSS/command), missing auth, CSRF, CORS, unvalidated input
+3. **Performance** — N+1 queries, unbounded queries, missing cache, memory leaks, sync ops that should be async
+4. **Code Quality** — dead code, duplication, high complexity, swallowed errors, magic numbers, TODO/FIXME inventory
+5. **Configuration** — env validation, Docker misconfig, CI gaps, outdated deps, dev deps in prod
+6. **Testing** — untested critical paths, meaningless assertions, flaky patterns, missing integration tests
 
 ## Process
 
 ### Step 1: Load Context
 
-Read `.claude/polyforge.json` and `CLAUDE.md` for project-specific context. This determines which analysis categories are relevant (e.g., skip DB analysis if no database).
+Read `.claude/polyforge.json` and `CLAUDE.md`. Determine which categories are relevant to the stack.
 
-### Step 2: Scan
+### Step 2: Scan (MANDATORY parallel subagents)
 
-Systematically scan the codebase:
-1. Read project structure and identify key directories
-2. Analyze each category relevant to the stack
-3. For each finding, record: file, line, category, severity, description, suggested fix
+For each relevant category, spawn a `[model: sonnet]` subagent scoped to its category:
+- Each subagent receives only its category's pattern definitions and relevant file types
+- Returns structured findings: `[{ file, line, category, severity, description, fix }]`
+
+Simultaneously, spawn a `[model: haiku]` subagent to return file/directory list and count only.
+
+Run all subagents in parallel. Exclude `vendor/`, `node_modules/`, `tmp/`, `.git/`.
 
 ### Step 3: Generate Report
 
-Create `docs/ANALYSIS-{YYYY-MM-DD}.md`:
+Merge all subagent findings. Create `docs/ANALYSIS-{YYYY-MM-DD}.md` using the structure at @skills/analyse-code/report-template.md
 
-```markdown
-# Code Analysis Report — {project_name}
-
-> ⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge) on {date}
-> Scope: {full project | specific directory}
-> Files analyzed: {count}
-
-## Summary
-
-| Category | Critical | High | Medium | Low |
-|----------|----------|------|--------|-----|
-| Security | 2 | 1 | 3 | 0 |
-| Performance | 0 | 2 | 4 | 1 |
-| Architecture | 0 | 1 | 2 | 3 |
-| Code Quality | 0 | 0 | 5 | 8 |
-| Config | 1 | 0 | 1 | 2 |
-| Testing | 0 | 1 | 3 | 2 |
-| **Total** | **3** | **5** | **18** | **16** |
-
-## Critical Findings
-
-### [SEC-001] Hardcoded API key in `src/services/payment.js:42`
-**Severity:** Critical
-**Category:** Security
-**Description:** AWS secret key is hardcoded in source code.
-**Suggested Fix:** Move to environment variable, add to `.env.example` as placeholder.
-
----
-
-## High Priority Findings
-...
-
-## Medium Priority Findings
-...
-
-## Low Priority Findings
-...
-
-## Positive Observations
-- {things done well — reinforce good practices}
-
-## Recommended Action Order
-1. Fix all Critical findings immediately
-2. Address High findings in next sprint
-3. Create tickets for Medium findings
-4. Add Low findings to backlog
-```
+If a previous `docs/ANALYSIS-*.md` exists, compare findings — mark `[NEW]` vs `[RECURRING]`.
 
 ### Step 4: Post-Report Actions
 
 Ask:
 "Report saved to `docs/ANALYSIS-{date}.md`. Found {N} issues ({critical} critical, {high} high). Create issues?
-(a) One issue per finding
-(b) One issue that covers all findings
-(c) One issue per category
-(d) No issues — just keep the report"
+(a) One issue per finding  (b) One issue for all  (c) One per category  (d) No — keep report only"
 
-If creating issues, use the same mechanism as `/report-issue`.
+If creating issues, use `/report-issue`.
 
 ## Context Management
 
-- For each analysis category, spawn a subagent to analyze in parallel. Each subagent returns findings as: {file, line, category, severity, description, fix}
-- For projects with >500 files, partition by directory and delegate to subagents
+- All category subagents run in parallel — each returns structured JSON findings only
+- Parent merges JSON and formats the report — no raw file content in parent context
 - After generating the report, compact the conversation — the report is the deliverable
-
-## Important Behaviors
-
-- Scan all directories (except `vendor/`, `node_modules/`, `tmp/`, `.git/`)
-- Prioritize findings by real impact, not theoretical risk
-- Include positive observations — reinforce good patterns
-- Reference actual code with file:line for every finding
-- Suggested fixes must be actionable, not vague
-- Compare with previous analysis if `docs/ANALYSIS-*.md` exists — highlight new vs resolved findings

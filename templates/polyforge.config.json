@@ -29,6 +29,10 @@
   },
   "autonomy": "semi",
   "permissions": "manual",
+  "context": {
+    "compactThreshold": 0.85,
+    "compactInstructions": "Preserve: list of modified files, current test status, active plan file path"
+  },
   "pipeline": {
     "preCommit": ["test", "lint"],
     "prePush": ["test", "lint", "vulncheck"],

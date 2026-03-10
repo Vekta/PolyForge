@@ -5,7 +5,7 @@ description: Use when the user asks to add, create, or configure a new rule, con
 
 # /add-rule — Add Project Rules
 
-You are PolyForge's rule manager. You add or update scoped rules in `.claude/rules/` without re-running `/forge`.
+You are PolyForge's rule manager. Add or update scoped rules in `.claude/rules/` without re-running `/forge`.
 
 ## Usage
 
@@ -27,61 +27,42 @@ gh pr view {number} --json body,comments,reviews
 ```
 Extract feedback, rejected patterns, or conventions that should be enforced.
 
-**If no arguments:** Ask with numbered choices:
-- What convention or rule do you want to enforce?
-- Which files should it apply to? (e.g., all files, backend only, tests only)
+**If no arguments:** Ask:
+1. What convention or rule to enforce?
+2. Which files should it apply to?
 
 ### Step 2: Determine Scope
 
-Identify which files the rule applies to:
-- **All files** → add to `CLAUDE.md` or `.claude/rules/polyforge-general.md`
+- **All files** → `CLAUDE.md` or `.claude/rules/polyforge-general.md`
 - **Backend files** → `.claude/rules/polyforge-backend.md` with `paths:` frontmatter
 - **Frontend files** → `.claude/rules/polyforge-frontend.md`
 - **Tests** → `.claude/rules/polyforge-tests.md`
 - **CI/PR workflow** → `.claude/rules/polyforge-workflow.md`
-- **Specific path** → create or update the appropriate scoped rule file
 
 ### Step 3: Write the Rule
 
 Rules must follow PolyForge conventions:
-- **Positive assertions** — "Services receive dependencies via constructor injection" not "Don't use static methods"
-- **Actionable** — Claude must be able to follow it mechanically
+- **Positive assertions** — "Services use constructor injection" not "Don't use static methods"
+- **Actionable** — Claude can follow it mechanically
 - **Specific** — reference file patterns, tools, or conventions by name
-- **One rule per line** — numbered list format
+- **One rule per line** — numbered list
 
 ### Step 4: Create or Update the Rule File
 
-Check if the target rule file exists:
-- If it exists → append the new rule(s) to the appropriate section
-- If it doesn't exist → create it with proper `paths:` frontmatter
-
-Example:
-```markdown
----
-paths:
-  - "src/**/*.php"
-  - "backend/**/*.go"
----
-# Backend Rules
-1. Services receive dependencies via constructor injection
-2. Repository methods return domain entities, never raw DB rows
-3. PR descriptions use the repo's pull_request_template.md verbatim
-```
+If the target file exists → append. If not → create with `paths:` frontmatter.
 
 ### Step 5: Confirm
 
-Show what was added:
 ```
 Added to .claude/rules/polyforge-workflow.md:
-  12. PR descriptions always follow the repo's pull_request_template.md — fill in every section, never skip or replace
+  12. PR descriptions always follow the repo's pull_request_template.md — fill every section, never skip
 ```
 
-Note: New rules take effect in the next Claude Code session. Restart Claude Code to apply.
+Note: New rules take effect in the next Claude Code session.
 
 ## Important Behaviors
 
 - Never overwrite existing rules — always append
 - Check for duplicate or conflicting rules before adding
-- Rules use positive assertions, never negations
 - Update `lastUpdatedAt` in `.claude/polyforge.json` after adding rules
-- If the rule applies globally (not path-scoped), suggest adding it to `CLAUDE.md` instead
+- If rule applies globally, suggest adding to `CLAUDE.md` instead

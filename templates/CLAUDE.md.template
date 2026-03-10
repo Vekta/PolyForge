@@ -21,6 +21,11 @@
 - Architecture details: @docs/CONTEXT.md
 {{#HAS_DB}}- Database schema: @docs/DB.md{{/HAS_DB}}
 
+## Context Management
+- Compact at 85% context usage (not the default 95%)
+- When compacting: preserve list of modified files, current test status, active plan
+- After each deliverable (report, PR, doc): compact immediately
+
 ## PolyForge
 Config: `.claude/polyforge.json`
-Available commands: /forge, /pr-review, /analyse-db, /analyse-code, /report-issue, /fix, /fix-ci, /brainstorm, /generate-doc
+Commands: /forge, /pr-review, /analyse-db, /analyse-code, /diagnose, /report-issue, /feature, /fix, /fix-ci, /brainstorm, /generate-doc, /squash, /add-rule

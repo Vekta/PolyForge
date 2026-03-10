@@ -5,171 +5,68 @@ description: Use when the user asks to analyze, document, inspect, or understand
 
 # /analyse-db — Database Analysis
 
-You are PolyForge's database analyst. You generate comprehensive database documentation by combining code analysis with live database queries.
+You are PolyForge's database analyst. Produce comprehensive database documentation.
 
 ## Usage
 
 ```
 /analyse-db                    Auto-detect and analyze all databases
-/analyse-db --code-only        Analyze from code only (no live connection)
+/analyse-db --code-only        Code analysis only (no live connection)
 /analyse-db --table users      Focus on a specific table/collection
 ```
 
 ## Process
 
-### Step 1: Read Project Configuration
+### Step 1: Read Configuration
 
-Load `.claude/polyforge.json` for:
-- `database.type`: mysql, postgres, mongo, redis, elasticsearch
-- `database.connectionMethod`: docker, direct
-- `database.containerName`: if docker
+Load `.claude/polyforge.json` for `database.type`, `database.connectionMethod`, `database.containerName`.
 
-If no config exists, auto-detect (same logic as `/forge`).
+If no config: auto-detect from `docker-compose.yml`, `.env.*`, and ORM config files (Doctrine, Prisma, TypeORM, GORM, Sequelize, ActiveRecord).
 
-### Step 2: Detect Database Configuration
+### Step 2: Extract Schema from Code
 
-**Docker (preferred)**
-```bash
-# Check for running DB containers
-docker compose ps
-docker ps --filter "ancestor=mysql" --filter "ancestor=postgres" --filter "ancestor=mongo"
+Scan ORM entities/models and migration directories. Build a timeline of schema evolution. Identify common query patterns from repositories/services.
+
+### Step 3: Query Live Database (if accessible)
+
+**Ask first** — show masked connection string, confirm before connecting.
+
+For Docker: `docker compose ps` to check if container is running. Offer to start if stopped.
+
+Query templates by database type: see @skills/analyse-db/sql-queries.md
+
+### Step 4: Per-Table Analysis (parallel subagents)
+
+For each table/collection, spawn a `[model: sonnet]` subagent with:
+- ORM entity code for that table
+- Migration history for that table
+- Query patterns referencing that table
+- Live schema data (if available)
+
+Each subagent returns:
+```json
+{ "table": "users", "columns": [...], "indexes": [...], "relations": [...], "queryPatterns": [...], "enumValues": {}, "warnings": [] }
 ```
 
-**Connection strings** — scan in order:
-1. `.env`, `.env.local`, `.env.development`
-2. `docker-compose.yml` / `docker-compose.override.yml`
-3. Framework config: `config/database.php`, `config/packages/doctrine.yaml`, `database.yml`, `prisma/schema.prisma`
-
-### Step 3: Extract Schema from Code
-
-**ORM Entities / Models**
-- PHP Doctrine: scan `src/Entity/`, look for `#[ORM\Entity]` or `@ORM\Entity`
-- PHP Eloquent: scan `app/Models/`
-- Go GORM: scan for `gorm.Model` struct embedding
-- Prisma: read `prisma/schema.prisma`
-- TypeORM: scan for `@Entity()` decorators
-- Django: scan `models.py` files
-
-**Migrations**
-- Scan migration directories for schema changes
-- Build a timeline of schema evolution
-
-**Common Query Patterns**
-- Scan repositories/services for query patterns
-- Identify frequently queried fields, joins, aggregations
-
-### Step 4: Query Live Database (if accessible)
-
-**Safety rules:**
-- Tables over 1M rows: use estimated counts from system metadata, never `COUNT(*)`
-- Enum sampling on large tables: query indexed columns or recent date ranges only
-- Read-only operations exclusively — never modify data
-- Set query timeout to 10 seconds
-
-**For MySQL/PostgreSQL:**
-```sql
--- List all tables with row counts
-SELECT table_name, table_rows, data_length
-FROM information_schema.tables
-WHERE table_schema = DATABASE();
-
--- Get column details per table
-SELECT column_name, data_type, is_nullable, column_default, column_key
-FROM information_schema.columns
-WHERE table_schema = DATABASE() AND table_name = '{table}';
-
--- Get foreign keys
-SELECT constraint_name, column_name, referenced_table_name, referenced_column_name
-FROM information_schema.key_column_usage
-WHERE table_schema = DATABASE() AND referenced_table_name IS NOT NULL;
-
--- Get indexes
-SHOW INDEX FROM {table};
-
--- Sample enum/set values with counts (small tables only)
-SELECT {column}, COUNT(*) FROM {table} GROUP BY {column} LIMIT 20;
-```
-
-**For MongoDB:**
-```javascript
-// List collections with stats
-db.getCollectionNames().forEach(c => printjson(db[c].stats()));
-
-// Sample documents for schema inference
-db.{collection}.find().limit(5);
-
-// Get indexes
-db.{collection}.getIndexes();
-```
+Run all table subagents in parallel.
 
 ### Step 5: Generate `docs/DB.md`
 
-Structure:
+Merge subagent results. Structure:
+- Overview: database type, table count, total estimated rows
+- Per-table: columns, indexes, relations, common query patterns, enum values
+- Relationship map (mermaid diagram)
+- Query anti-patterns detected
+- Large table warnings (>1M rows)
 
-```markdown
-# Database Schema — {project_name}
-
-> ⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge) on {date}
-> Source: {live database | code analysis only}
-
-## Overview
-- Database: {type} {version}
-- Tables/Collections: {count}
-- Total estimated rows: {count}
-
-## Tables
-
-### {table_name}
-**Rows:** ~{count} | **Engine:** {engine}
-
-| Column | Type | Nullable | Key | Default | Description |
-|--------|------|----------|-----|---------|-------------|
-| id | bigint | NO | PRI | auto | |
-| ... | ... | ... | ... | ... | ... |
-
-**Indexes:**
-- `PRIMARY` (id)
-- `idx_email` (email) UNIQUE
-
-**Relations:**
-- `user_id` → `users.id` (FK)
-
-**Common Query Patterns:**
-- Filtered by: {fields detected from code}
-- Joined with: {tables detected from code}
-
-**Enum Values:**
-- `status`: active (1234), inactive (567), suspended (89)
-
----
-
-## Relationship Map
-{ASCII or mermaid diagram of table relationships}
-
-## Query Anti-Patterns
-- {table}: avoid full scan on {column} — add WHERE on {indexed_column}
-
-## Large Table Warnings
-- {table} (~5M rows): always filter by {date_column}, use LIMIT
-```
-
-### Step 6: Verification
-
-- Cross-reference live data with ORM entities — flag discrepancies
+Cross-reference live data with ORM entities:
 - Flag tables in DB but missing from ORM (orphaned tables)
 - Flag entities in code but missing from DB (pending migrations)
-- Add verification timestamp to the document
+
+Update existing `docs/DB.md` if it exists (backup to `tmp/` first). Add verification timestamp.
 
 ## Context Management
 
-- For projects with >20 tables, delegate per-table analysis to subagents and merge results
+- All per-table analysis delegated to `[model: sonnet]` subagents — only structured JSON returned to parent
+- Load SQL templates on-demand from @skills/analyse-db/sql-queries.md based on detected DB type
 - After generating docs/DB.md, compact the conversation — the document is the deliverable
-- Load SQL templates on-demand based on detected DB type (don't process MySQL queries for a MongoDB project)
-
-## Important Behaviors
-
-- Ask before connecting to any database — show the connection string (masked password) and confirm
-- If Docker container is stopped, offer to start it
-- Handle connection failures gracefully — fall back to code-only analysis
-- All tables/collections must be documented — skip nothing
-- Update existing `docs/DB.md` if it exists (backup to `tmp/` first)

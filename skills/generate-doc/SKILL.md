@@ -5,7 +5,7 @@ description: Use when the user asks to generate, update, or refresh project docu
 
 # /generate-doc — Documentation Generator
 
-You are PolyForge's documentation generator. You create and maintain documentation optimized for Claude Code to understand the project efficiently.
+You are PolyForge's documentation generator. Create documentation optimized for Claude Code to understand the project efficiently.
 
 ## Usage
 
@@ -18,185 +18,51 @@ You are PolyForge's documentation generator. You create and maintain documentati
 
 ## What Gets Generated
 
-### 1. `CLAUDE.md` (under 200 lines — strict)
-
-The root file Claude Code reads every session. Must be concise and high-signal.
-
-Structure:
-```markdown
-# {Project Name}
-
-{One-line description}
-
-## Stack
-{language} {version} + {framework} {version} + {database}
-
-## Commands
-- Build: `{command}`
-- Test: `{command}`
-- Lint: `{command}`
-- Dev server: `{command}`
-
-## Architecture
-{3-5 lines describing the architecture pattern and key directories}
-
-## Conventions
-- {convention 1 — only what Claude can't infer from code}
-- {convention 2}
-
-## Key References
-- Architecture details: @docs/CONTEXT.md
-- Database schema: @docs/DB.md
-- API documentation: @docs/API.md
-
-## PolyForge
-Config: `.claude/polyforge.json`
-Commands: /forge, /pr-review, /analyse-db, /analyse-code, /diagnose, /report-issue, /feature, /fix, /fix-ci, /brainstorm, /generate-doc, /squash, /add-rule
-```
-
-Every line must pass the test: "Would removing this cause Claude to make mistakes?" If no, cut it.
-
-### 2. `docs/CONTEXT.md` (detailed, no size limit)
-
-The deep reference document. Covers everything Claude might need for complex tasks.
-
-Structure:
-```markdown
-# Project Context — {name}
-
-> ⚒ Last updated: {date} · Forged with [PolyForge](https://github.com/Vekta/polyforge)
-
-## Purpose
-{What this project does, who it's for, 3-5 sentences}
-
-## Architecture
-
-### Pattern
-{Detailed description: Clean Architecture, DDD, MVC, etc.}
-
-### Directory Structure
-```
-{annotated tree of key directories}
-```
-
-### Layer Responsibilities
-- **Domain/Entities**: {what goes here}
-- **Use Cases/Services**: {what goes here}
-- **Infrastructure**: {what goes here}
-- **Presentation/Controllers**: {what goes here}
-
-## Dependencies
-
-### External
-- {dependency}: {why it's used, version}
-
-### Internal Repositories
-- {repo}: {relationship, how it's used}
-
-## Data Flow
-{How a request flows through the system — entry point to response}
-
-## Key Patterns
-- {Pattern 1}: {where and how it's used}
-- {Pattern 2}: {where and how it's used}
-
-## Environment
-- Required env vars: {list with descriptions}
-- Docker services: {what runs in docker}
-
-## Deployment
-- {How the project is deployed}
-
-## Known Quirks
-- {Non-obvious behavior 1}
-- {Non-obvious behavior 2}
-```
-
-### 3. `.claude/rules/` (scoped rules)
-
-Generate scoped rule files based on detected stack. Examples:
-
-**`.claude/rules/polyforge-backend.md`** (for PHP/Go backend files):
-```markdown
----
-paths:
-  - "src/**/*.php"
-  - "internal/**/*.go"
----
-# Backend Rules
-- Services receive dependencies via constructor injection
-- Repository methods return domain entities, never raw DB rows
-- All public service methods have corresponding test methods
-```
-
-**`.claude/rules/polyforge-frontend.md`** (for JS/TS frontend files):
-```markdown
----
-paths:
-  - "src/**/*.tsx"
-  - "src/**/*.ts"
----
-# Frontend Rules
-- Components are functional with hooks
-- State management via {detected: Redux/Zustand/Context}
-- All user-facing strings use i18n keys
-```
-
-**`.claude/rules/polyforge-tests.md`**:
-```markdown
----
-paths:
-  - "tests/**/*"
-  - "**/*.test.*"
-  - "**/*.spec.*"
----
-# Testing Rules
-- Test names describe behavior: "it should {expected} when {condition}"
-- Use factories/fixtures for test data, never hardcode
-- Each test is independent — no shared mutable state
-```
+1. **`CLAUDE.md`** — under 200 lines strict. Every line must pass: "Would removing this cause Claude to make mistakes?" If no, cut it.
+2. **`docs/CONTEXT.md`** — detailed architecture, dependencies, data flow, key patterns, quirks. No size limit.
+3. **`.claude/rules/`** — scoped rule files with `paths:` frontmatter.
 
 ## Process
 
-### Step 1: Analyze the Project
+### Step 1: Analyze Project (subagent)
 
-1. Read existing `.claude/polyforge.json` for known context
-2. Scan the full project structure
-3. Read key files: entry points, config files, main modules
-4. Analyze patterns: how dependencies are injected, how errors are handled, how data flows
-5. Check for existing docs to update rather than overwrite
+Spawn a `[model: sonnet]` subagent to scan the full project and return a structured summary:
+
+```json
+{
+  "stack": {}, "entryPoints": [], "architecture": "",
+  "patterns": [], "conventions": [], "envVars": [],
+  "knownQuirks": [], "keyFiles": [], "testFrameworks": []
+}
+```
+
+The subagent reads: entry points, config files, main modules, existing docs. Returns structured JSON only.
 
 ### Step 2: Handle Existing Files
 
 For each file to generate:
-- If it doesn't exist → create it
-- If it exists and was generated by PolyForge (has the `Forged with PolyForge` marker) → update it
-- If it exists and was NOT generated by PolyForge → ask: "(a) Merge (b) Keep existing, create separate file (c) Replace (backup to tmp/)"
+- Doesn't exist → create
+- Exists with PolyForge marker (`Forged with PolyForge`) → update in-place
+- Exists without marker → ask: "(a) Merge (b) Keep existing, create separate file (c) Replace (backup to tmp/)"
 
 ### Step 3: Generate and Confirm
 
-Show a preview of what will be created/updated:
-```
-Files to create/update:
-  + CLAUDE.md (142 lines)
-  + docs/CONTEXT.md (89 lines)
-  + .claude/rules/polyforge-backend.md (15 lines)
-  + .claude/rules/polyforge-tests.md (12 lines)
-```
+Show a preview with file names and line counts. Ask: "Generate? (y/n/preview {filename})"
 
-Ask: "Generate these files? (y/n/preview {filename})"
+Generate each file from the structured summary. After each file, compact keeping only the summary and remaining files to generate.
+
+**CLAUDE.md** — include only: build/test/lint commands, architecture pattern, key non-obvious conventions, `@` refs to detailed docs. Include PolyForge commands list.
+
+**`.claude/rules/`** — scope with `paths:` frontmatter. Examples:
+- `polyforge-backend.md`: `src/**/*.php`, `internal/**/*.go`
+- `polyforge-frontend.md`: `src/**/*.tsx`, `src/**/*.ts`
+- `polyforge-tests.md`: `tests/**/*`, `**/*.test.*`, `**/*.spec.*`
+
+Rules must be positive assertions, actionable, and one per line.
 
 ## Context Management
 
-- Delegate codebase scanning for CONTEXT.md to a subagent — the subagent returns a structured summary, the parent formats the final document
-- Scan progressively: directory tree first, then key entry points, then config files
-- After generating all files, compact the conversation
-
-## Important Behaviors
-
-- CLAUDE.md MUST stay under 200 lines — this is non-negotiable
-- Use `@path` references in CLAUDE.md to point to detailed docs — keep CLAUDE.md as an index
-- Rules must be scoped with `paths:` frontmatter — generic rules go in CLAUDE.md
-- Detect conventions from actual code, not assumptions
-- Include only what Claude can't figure out by reading the code
+- Step 1 scan delegated entirely to `[model: sonnet]` subagent — structured JSON only returned
+- Generate files one at a time, compact between each file
+- CLAUDE.md MUST stay under 200 lines — non-negotiable
 - Update `lastUpdatedAt` in `.claude/polyforge.json` after generating
