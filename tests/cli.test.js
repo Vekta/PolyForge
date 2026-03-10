@@ -72,7 +72,7 @@ describe('polyforge CLI', () => {
 });
 
 describe('skill files', () => {
-  const skillDirs = ['init', 'pr-review', 'analyse-db', 'report-issue', 'feature', 'fix', 'fix-ci', 'brainstorm', 'analyse-code', 'generate-doc', 'squash', 'add-rule'];
+  const skillDirs = ['init', 'pr-review', 'analyse-db', 'report-issue', 'feature', 'fix', 'fix-ci', 'brainstorm', 'analyse-code', 'generate-doc', 'squash', 'add-rule', 'diagnose'];
 
   for (const skill of skillDirs) {
     it(`${skill}/SKILL.md exists`, () => {

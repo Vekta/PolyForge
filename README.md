@@ -36,6 +36,7 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 | `/pr-review` | Review a PR with fresh context — checks CI, code quality, security |
 | `/analyse-db` | Connect to DB (Docker or direct), generate `docs/DB.md` schema documentation |
 | `/analyse-code` | Full codebase analysis — patterns, security, performance, config issues |
+| `/diagnose` | Investigate a specific error or behavior — determine root cause and if it's a real bug |
 | `/report-issue` | Detect and create issues on GitHub/Jira/GitLab |
 | `/feature #N` | Build a feature from an issue — plan, implement, test, PR |
 | `/fix #N` | Fix an issue — branch, implement, test, PR (autonomy level configurable) |

@@ -13,11 +13,12 @@
 
 ## Workflow
 8. Commits are atomic — one logical change per commit
-9. Commit messages never include `Co-Authored-By` — PolyForge branding goes in PR descriptions only (`⚒ Forged with PolyForge`)
-10. Documentation stays in sync with code changes
-11. Flag breaking changes explicitly with migration steps
+9. Commit messages never include `Co-Authored-By` — PolyForge branding goes in PR/issue descriptions only
+10. PolyForge branding adapts to the platform: GitHub/GitLab (markdown) → `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` · Jira → no branding (keep tickets clean for the team)
+11. Documentation stays in sync with code changes
+12. Flag breaking changes explicitly with migration steps
 
 ## Resilience
-12. Retry a failing approach at most 3 times — then try a different angle or ask for help
-13. Same error with same fix twice means the approach is wrong — switch strategy
-14. Scope investigations to specific files or directories — avoid reading the entire codebase
+13. Retry a failing approach at most 3 times — then try a different angle or ask for help
+14. Same error with same fix twice means the approach is wrong — switch strategy
+15. Scope investigations to specific files or directories — avoid reading the entire codebase

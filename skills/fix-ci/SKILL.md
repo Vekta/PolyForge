@@ -122,12 +122,32 @@ gh pr checks --watch
 - Local: {command} → {pass/fail}
 - CI: {status after push}
 
-### Remaining Issues (if any)
-- {what still fails and why it needs human intervention}
+### Remaining Failures
+
+For EACH remaining failure, categorize and propose an action:
+
+| Failure | Category | Proposed Action |
+|---------|----------|-----------------|
+| {test/check name} | 🟢 Quick fix | {concrete fix — do it now} |
+| {test/check name} | 🟡 Needs investigation | {what to investigate — create issue with `/report-issue`} |
+| {test/check name} | 🔴 Infrastructure/config | {what's missing — create issue assigned to team/ops} |
 
 ---
 *⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*
 ```
+
+After presenting the report, ask for each category:
+
+**🟢 Quick fixes found:** "I can fix {N} failures right now. Proceed?"
+- If yes → fix them, re-run pipeline
+
+**🟡 Needs investigation:** "Create `/diagnose` issues for these {N} failures?"
+- If yes → create issues via `/report-issue` with the failure context pre-filled
+
+**🔴 Infrastructure/config:** "Create issues for these {N} infra problems?"
+- If yes → create issues via `/report-issue` tagged as infra/config
+
+**Never leave failures unaddressed.** Every remaining failure must result in either a fix or an issue.
 
 ## Context Management
 

@@ -119,7 +119,11 @@ If any step fails:
 - Attempt to fix automatically (up to 2 retries)
 - Same error with same approach twice → try a different angle, do not repeat
 - After 2 failed attempts, compact context before the 3rd try
-- If still failing after 3 total attempts, show the error and ask for guidance — do not loop further
+- If still failing after 3 total attempts, categorize each remaining failure:
+  - 🟢 **Quick fix** → fix it now
+  - 🟡 **Needs investigation** → create an issue via `/report-issue`
+  - 🔴 **Pre-existing / infra** → create an issue via `/report-issue` tagged as infra
+- Never ignore remaining failures — every one gets a fix or an issue
 
 ### Step 6: Clean Up Commits
 
@@ -184,6 +188,16 @@ jira issue move {key} "In Review"
 jira issue comment add {key} "Implementation submitted in PR #{pr-number}"
 ```
 Fallback to REST API if `jira` CLI is not installed.
+
+### Step 9: Wait for CI and Act on Results
+
+```bash
+gh pr checks --watch
+```
+
+If CI passes → done, report success.
+
+If CI fails → run `/fix-ci` automatically to diagnose and fix. Do not leave the PR with a failing CI.
 
 ## Context Management
 

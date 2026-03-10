@@ -50,6 +50,14 @@ Scan the project root and detect:
 - Look for Jira config: `.jira`, `jira.config`, env vars with `JIRA_URL` or `ATLASSIAN`
 - Look for GitLab: `.gitlab-ci.yml`, git remote pointing to gitlab.com
 - Look for Linear: `.linear` config
+- Detect issue title prefix from recent issues:
+  ```bash
+  # GitHub
+  gh issue list --limit 10 --json title --jq '.[].title' | grep -oP '^\[.*?\]' | sort | uniq -c | sort -rn | head -1
+  # Jira
+  jira issue list --plain --columns summary -q"ORDER BY created DESC" 2>/dev/null | head -10 | grep -oP '^\[.*?\]' | sort | uniq -c | sort -rn | head -1
+  ```
+  If a consistent prefix is found (e.g., `[pnp-api]`), store as `issueTracker.config.titlePrefix` in `polyforge.json`
 
 ### Git Workflow
 - Analyze branch naming from `git branch -a`
@@ -148,7 +156,7 @@ Generate based on detected stack. Include:
 - `@` references to detailed docs
 - Key conventions detected
 - PolyForge commands (use these exact names):
-  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`, `/add-rule`
+  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/diagnose`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`, `/add-rule`
 
 If a `CLAUDE.md` already exists:
 - Ask: "A CLAUDE.md already exists. (a) Merge PolyForge config into it (b) Keep it and create `.claude/rules/polyforge.md` instead (c) Replace it (backup saved to `tmp/`)"
@@ -166,7 +174,7 @@ Create if missing. Add to `.gitignore` if not already there.
 
 - After generating all config files, present a summary of what was created and their locations
 - End the summary with: "**Restart Claude Code** to load the new configuration (settings, rules, and permissions take effect on session start)."
-- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`, `/add-rule` — never prefix with `polyforge-`
+- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/diagnose`, `/report-issue`, `/feature`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`, `/squash`, `/add-rule` — never prefix with `polyforge-`
 - Do not keep raw scan data in context — extract what's needed and discard
 
 ## Important Behaviors

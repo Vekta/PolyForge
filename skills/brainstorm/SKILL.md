@@ -48,7 +48,7 @@ Produce a detailed plan in this format:
 
 ```markdown
 # Brainstorm: {title}
-> Date: {date}
+> ⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge) on {date}
 > Context: {1-2 sentence summary of the discussion}
 
 ## Goal

@@ -91,8 +91,12 @@ ls .gitlab/issue_templates/ 2>/dev/null
 
 **GitHub Issues:**
 ```bash
+# Check for title prefix in polyforge.json → issueTracker.config.titlePrefix
+# If set (e.g., "[pnp-api]"), prepend to title: "[pnp-api] {title}"
+# If not set, use title as-is
+
 gh issue create \
-  --title "{title}" \
+  --title "{prefix} {title}" \
   --body "{body from template}" \
   --label "{severity},{type}" \
   --assignee "{from git blame if applicable}"
@@ -100,12 +104,17 @@ gh issue create \
 
 **Jira (preferred — via CLI):**
 ```bash
+# Get current user for auto-assignment
+JIRA_USER=$(jira me --raw | jq -r '.displayName // .emailAddress')
+
+# Check for title prefix in polyforge.json → issueTracker.config.titlePrefix
 jira issue create \
   --type "{Bug|Task|Story}" \
-  --summary "{title}" \
+  --summary "{prefix} {title}" \
   --body "{body}" \
   --priority "{priority}" \
-  --label "{labels}"
+  --label "{labels}" \
+  --assignee "$JIRA_USER"
 ```
 
 **Jira (fallback — via REST API):**
