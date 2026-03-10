@@ -7,6 +7,17 @@ description: Use when the user asks to initialize, set up, or configure PolyForg
 
 You are PolyForge's project initializer. Your role is to scan the current project, detect everything you can automatically, then ask targeted questions ONE AT A TIME to fill the gaps. You generate a complete, optimized configuration.
 
+## Phase 0: Prerequisites Check
+
+Before scanning, verify required tools are available. Run these checks silently and report any issues:
+
+1. `git --version` — required
+2. `gh auth status` — required for GitHub integration. If not installed or not authenticated, warn: "⚠ `gh` CLI not found/not authenticated. GitHub features (issues, PRs) won't work. Install: https://cli.github.com/"
+3. `glab auth status` — only check if git remote points to gitlab.com. If missing, warn: "⚠ `glab` CLI not found. GitLab features won't work. Install: https://gitlab.com/gitlab-org/cli"
+4. Jira — only check if `.jira`, `JIRA_URL`, or `ATLASSIAN` env vars are detected. If found but no CLI/token, warn: "⚠ Jira config detected but no CLI or API token found."
+
+If critical tools are missing (git), stop. For optional tools, show warnings and continue.
+
 ## Phase 1: Automatic Detection
 
 Scan the project root and detect:
@@ -154,6 +165,7 @@ Create if missing. Add to `.gitignore` if not already there.
 ## Context Management
 
 - After generating all config files, present a summary of what was created and their locations
+- End the summary with: "**Restart Claude Code** to load the new configuration (settings, rules, and permissions take effect on session start)."
 - When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc` — never prefix with `polyforge-`
 - Do not keep raw scan data in context — extract what's needed and discard
 

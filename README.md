@@ -17,12 +17,15 @@ npx polyforgeai install
 
 This symlinks PolyForge skills and rules into `~/.claude/`, making them available in any Claude Code session.
 
+> **Restart Claude Code** after installing or updating PolyForge — skills are loaded at session start.
+
 ## Quick Start
 
-1. Install PolyForge
-2. Open Claude Code in your project
-3. Run `/forge` — PolyForge scans your project and generates an optimized configuration
-4. Use any command: `/pr-review`, `/fix #123`, `/brainstorm`, etc.
+1. Install PolyForge and restart Claude Code
+2. If your project already has a `.claude/` directory with custom commands or skills, back it up first (`mv .claude .claude-backup`) — `/forge` will recreate it cleanly
+3. Open Claude Code in your project
+4. Run `/forge` — PolyForge scans your project and generates an optimized configuration
+5. Use any command: `/pr-review`, `/fix #123`, `/brainstorm`, etc.
 
 ## Commands
 
@@ -125,7 +128,11 @@ npx polyforgeai uninstall
 
 - Node.js >= 18
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
-- [`gh` CLI](https://cli.github.com/) (for GitHub integration)
+
+**Issue tracker CLIs (install only what you use):**
+- [GitHub CLI](https://cli.github.com/) — GitHub Issues
+- [GitLab CLI](https://gitlab.com/gitlab-org/cli) — GitLab Issues
+- [Jira CLI](https://github.com/ankitpokhrel/jira-cli) or API token — Jira
 
 > **Note:** PolyForge is built on Claude Code's native extension system (skills, rules, hooks). It requires Claude Code as its runtime and does not support other AI models or providers. The skills are plain markdown and could be adapted to other tools in the future, but the orchestration (subagents, worktrees, context management) relies on Claude Code.
 
