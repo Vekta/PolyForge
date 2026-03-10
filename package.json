@@ -1,5 +1,5 @@
 {
-  "name": "polyforge",
+  "name": "polyforgeai",
   "version": "0.1.0",
   "description": "Self-adaptive Claude Code plugin for automated software development workflows",
   "bin": {

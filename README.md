@@ -1,4 +1,4 @@
-[![npm version](https://img.shields.io/npm/v/polyforge.svg)](https://www.npmjs.com/package/polyforge)
+[![npm version](https://img.shields.io/npm/v/polyforgeai.svg)](https://www.npmjs.com/package/polyforgeai)
 [![CI](https://github.com/Vekta/polyforge/actions/workflows/ci.yml/badge.svg)](https://github.com/Vekta/polyforge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
@@ -12,7 +12,7 @@ PolyForge scans your project, detects your stack, architecture, and conventions,
 ## Install
 
 ```bash
-npx polyforge install
+npx polyforgeai install
 ```
 
 This symlinks PolyForge skills and rules into `~/.claude/`, making them available in any Claude Code session.
@@ -87,11 +87,11 @@ Launches a single session with all permissions granted. Nothing is saved — nex
 Install everything or pick what you need:
 
 ```bash
-npx polyforge install                  # Install all skills & rules
-npx polyforge install --force          # Reinstall, overwriting existing
-npx polyforge add-skill pr-review fix  # Install specific skills only
-npx polyforge remove-skill analyse-db  # Remove a skill
-npx polyforge list                     # See available skills & install status
+npx polyforgeai install                  # Install all skills & rules
+npx polyforgeai install --force          # Reinstall, overwriting existing
+npx polyforgeai add-skill pr-review fix  # Install specific skills only
+npx polyforgeai remove-skill analyse-db  # Remove a skill
+npx polyforgeai list                     # See available skills & install status
 ```
 
 ### Issue Tracker Integration
@@ -112,13 +112,13 @@ Auto-detected during `/init`:
 ## Update
 
 ```bash
-npx polyforge update
+npx polyforgeai update
 ```
 
 ## Uninstall
 
 ```bash
-npx polyforge uninstall
+npx polyforgeai uninstall
 ```
 
 ## Requirements
