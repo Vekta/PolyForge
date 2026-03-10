@@ -133,4 +133,5 @@ gh pr checks --watch
 
 - Use a subagent to parse large CI logs (>500 lines) — return only errors and context
 - After each fix iteration, keep only: current failure, hypothesis, fix applied
+- Before pushing, squash fix iterations into a single clean commit (e.g., `fix(ci): resolve lint failures` not 5 separate "try fix" commits)
 - After final report, compact the conversation

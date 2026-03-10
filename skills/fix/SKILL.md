@@ -99,7 +99,16 @@ If any step fails:
 - After 2 failed attempts, compact context before the 3rd try
 - If still failing after 3 total attempts, show the error and ask for guidance — do not loop further
 
-### Step 6: Create PR
+### Step 6: Clean Up Commits
+
+Before creating the PR, reorganize commits into logical groups (3-7 commits max). Use `git rebase -i main` to:
+- Squash "fix lint", "fix type", "fix test" into the parent commit they correct
+- Keep meaningful commits separate: schema/migration, core logic, API layer, tests
+- Use `git commit --fixup <SHA>` during development for correction commits, then `git rebase -i --autosquash main` to clean up
+
+Target: each commit in the PR should be one reviewable, revertible logical unit.
+
+### Step 7: Create PR
 
 ```bash
 gh pr create \
