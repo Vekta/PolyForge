@@ -21,14 +21,14 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 
 1. Install PolyForge
 2. Open Claude Code in your project
-3. Run `/init` — PolyForge scans your project and generates an optimized configuration
+3. Run `/forge` — PolyForge scans your project and generates an optimized configuration
 4. Use any command: `/pr-review`, `/fix #123`, `/brainstorm`, etc.
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/init` | Scan project, detect stack/architecture, generate config interactively |
+| `/forge` | Scan project, detect stack/architecture, generate config interactively |
 | `/pr-review` | Review a PR with fresh context — checks CI, code quality, security |
 | `/analyse-db` | Connect to DB (Docker or direct), generate `docs/DB.md` schema documentation |
 | `/analyse-code` | Full codebase analysis — patterns, security, performance, config issues |
@@ -48,7 +48,7 @@ PolyForge uses Claude Code's native extension points:
 
 ### Project Configuration
 
-After `/init`, your project gets:
+After `/forge`, your project gets:
 
 ```
 .claude/
@@ -64,16 +64,16 @@ tmp/                       # PolyForge working directory (gitignored)
 
 ### Autonomy Levels
 
-Configured per project during `/init`:
+Configured per project during `/forge`:
 
 - **Full auto**: PolyForge branches, fixes, tests, and creates PRs autonomously
 - **Semi-auto**: PolyForge proposes changes, waits for approval before applying
 
 ### Permissions & Hands-Free Mode
 
-By default, Claude Code asks for permission on every file edit and shell command. If you chose "full auto" during `/init`, you'll be asked whether to grant full permissions for the project.
+By default, Claude Code asks for permission on every file edit and shell command. If you chose "full auto" during `/forge`, you'll be asked whether to grant full permissions for the project.
 
-**Via `/init` (persistent, per-project):**
+**Via `/forge` (persistent, per-project):**
 Generates a `.claude/settings.json` that auto-approves all operations in the project directory. You can revert by deleting the file.
 
 **Via CLI flag (one-time, any project):**
@@ -96,7 +96,7 @@ npx polyforgeai list                     # See available skills & install status
 
 ### Issue Tracker Integration
 
-Auto-detected during `/init`:
+Auto-detected during `/forge`:
 - **GitHub Issues** — detected via `gh api`
 - **Jira** — detected from `.env`, `.jira` config
 - **GitLab** — detected from git remote

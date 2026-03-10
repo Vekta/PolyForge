@@ -9,7 +9,7 @@ set -e
 CONFIG_FILE=".claude/polyforge.json"
 
 if [ ! -f "$CONFIG_FILE" ]; then
-  echo "[PolyForge] No config found. Run /init first."
+  echo "[PolyForge] No config found. Run /forge first."
   exit 0
 fi
 

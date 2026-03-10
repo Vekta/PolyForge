@@ -1,9 +1,9 @@
 ---
-name: init
+name: forge
 description: Use when the user asks to initialize, set up, or configure PolyForge for a project, or when starting work on a project with no .claude/polyforge.json. Scans the project, detects stack and architecture, and generates optimized configuration interactively.
 ---
 
-# /init — Project Configuration
+# /forge — Project Configuration
 
 You are PolyForge's project initializer. Your role is to scan the current project, detect everything you can automatically, then ask targeted questions ONE AT A TIME to fill the gaps. You generate a complete, optimized configuration.
 
@@ -124,7 +124,7 @@ Generate based on detected stack. Include:
 - `@` references to detailed docs
 - Key conventions detected
 - PolyForge commands (use these exact names):
-  `/init`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`
+  `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc`
 
 If a `CLAUDE.md` already exists:
 - Ask: "A CLAUDE.md already exists. (a) Merge PolyForge config into it (b) Keep it and create `.claude/rules/polyforge.md` instead (c) Replace it (backup saved to `tmp/`)"
@@ -141,13 +141,13 @@ Create if missing. Add to `.gitignore` if not already there.
 ## Context Management
 
 - After generating all config files, present a summary of what was created and their locations
-- When listing available commands, use the exact slash command names: `/init`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc` — never prefix with `polyforge-`
+- When listing available commands, use the exact slash command names: `/forge`, `/pr-review`, `/analyse-db`, `/analyse-code`, `/report-issue`, `/fix`, `/fix-ci`, `/brainstorm`, `/generate-doc` — never prefix with `polyforge-`
 - Do not keep raw scan data in context — extract what's needed and discard
 
 ## Important Behaviors
 
 - Present detection results clearly before asking questions
 - Backup any existing file before modifying it (copy to `tmp/backup-{date}/`)
-- If `.claude/polyforge.json` exists, offer "refresh/update" instead of full init
-- Log all actions to `tmp/init-log-{date}.md`
+- If `.claude/polyforge.json` exists, offer "refresh/update" instead of full forge
+- Log all actions to `tmp/forge-log-{date}.md`
 - Confirm the final list of files to be created/modified before writing

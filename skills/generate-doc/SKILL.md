@@ -51,7 +51,7 @@ Structure:
 
 ## PolyForge
 Config: `.claude/polyforge.json`
-Commands: /init, /pr-review, /analyse-db, /analyse-code, /report-issue, /fix, /fix-ci, /brainstorm, /generate-doc
+Commands: /forge, /pr-review, /analyse-db, /analyse-code, /report-issue, /fix, /fix-ci, /brainstorm, /generate-doc
 ```
 
 Every line must pass the test: "Would removing this cause Claude to make mistakes?" If no, cut it.

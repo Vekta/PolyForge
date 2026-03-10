@@ -24,7 +24,7 @@ Load `.claude/polyforge.json` for:
 - `database.connectionMethod`: docker, direct
 - `database.containerName`: if docker
 
-If no config exists, auto-detect (same logic as `/init`).
+If no config exists, auto-detect (same logic as `/forge`).
 
 ### Step 2: Detect Database Configuration
 

@@ -76,7 +76,7 @@ function install() {
     }
   }
 
-  console.log('\n✓ PolyForge installed. Use /init in Claude Code to configure a project.\n');
+  console.log('\n✓ PolyForge installed. Use /forge in Claude Code to configure a project.\n');
 }
 
 function uninstall() {
@@ -214,7 +214,7 @@ Usage:
   npx polyforge help                  Show this help
 
 After install, use these slash commands in Claude Code:
-  /init            Scan & configure current project
+  /forge            Scan & configure current project
   /pr-review       Review a PR (fresh context + CI check)
   /analyse-db      Analyze database schema
   /analyse-code    Full codebase analysis
