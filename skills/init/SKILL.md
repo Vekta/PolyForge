@@ -54,7 +54,9 @@ Scan the project root and detect:
 
 After displaying what you detected, ask targeted questions to fill gaps. Always ask ONE question, wait for the answer, then ask the next.
 
-Suggested question flow (skip any already answered by detection). **Every question MUST use numbered choices — never open-ended.**
+**IMPORTANT: Use the `AskUserQuestion` tool for EVERY question.** Provide predefined choices via the `options` parameter so the user can select with a single click. Only add a free-text option when necessary (e.g., "Needs correction").
+
+Suggested question flow (skip any already answered by detection):
 
 1. "I detected [stack]. Is this correct?"
    - 1. Correct, no other dependencies
