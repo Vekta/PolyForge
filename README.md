@@ -1,4 +1,5 @@
 [![npm version](https://img.shields.io/npm/v/polyforgeai.svg)](https://www.npmjs.com/package/polyforgeai)
+[![npm downloads](https://img.shields.io/npm/dm/polyforgeai.svg)](https://www.npmjs.com/package/polyforgeai)
 [![CI](https://github.com/Vekta/polyforge/actions/workflows/ci.yml/badge.svg)](https://github.com/Vekta/polyforge/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
@@ -36,6 +37,7 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 | `/analyse-db` | Connect to DB (Docker or direct), generate `docs/DB.md` schema documentation |
 | `/analyse-code` | Full codebase analysis — patterns, security, performance, config issues |
 | `/report-issue` | Detect and create issues on GitHub/Jira/GitLab |
+| `/feature #N` | Build a feature from an issue — plan, implement, test, PR |
 | `/fix #N` | Fix an issue — branch, implement, test, PR (autonomy level configurable) |
 | `/fix-ci` | Diagnose and fix CI/CD failures — loops max 3 times then reports |
 | `/brainstorm` | Free-form brainstorming — produces action plan with parallelizable tasks |

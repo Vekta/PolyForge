@@ -101,15 +101,27 @@ If any step fails:
 
 ### Step 6: Clean Up Commits
 
-Before creating the PR, reorganize commits into logical groups (3-7 commits max). Use `git rebase -i main` to:
-- Squash "fix lint", "fix type", "fix test" into the parent commit they correct
-- Keep meaningful commits separate: schema/migration, core logic, API layer, tests
-- Use `git commit --fixup <SHA>` during development for correction commits, then `git rebase -i --autosquash main` to clean up
+Before creating the PR, reorganize commits into logical groups (3-7 commits max):
 
-Target: each commit in the PR should be one reviewable, revertible logical unit.
+1. `git reset --soft $(git merge-base HEAD origin/main)` to unstage all commits
+2. Re-commit in logical groups by staging files per group
+3. If files overlap across groups, use `git add -p` to stage hunks selectively
+
+Target: each commit should be one reviewable, revertible logical unit. Absorb "fix lint", "fix type" into their parent commit — they never stand alone.
+
+Alternatively, run `/squash` to do this interactively.
 
 ### Step 7: Create PR
 
+First, check if the repo has a PR template:
+```bash
+# Check common template locations
+cat .github/pull_request_template.md 2>/dev/null || cat .github/PULL_REQUEST_TEMPLATE.md 2>/dev/null || cat docs/pull_request_template.md 2>/dev/null
+```
+
+**If a PR template exists:** Use it as the base. Fill in the relevant sections (summary, type of change checkboxes, checklist items, issue links). Never remove sections — leave them empty if not applicable. Append `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` at the bottom.
+
+**If no PR template exists:** Use this default:
 ```bash
 gh pr create \
   --title "fix: {short description} (#{issue-number})" \
@@ -146,7 +158,7 @@ gh issue comment 123 --body "Fix submitted in PR #{pr-number}"
 
 - If the fix plan identifies independent file groups, delegate implementation of each group to a subagent
 - After the PR is created, compact the conversation — the PR is the deliverable
-- For large fixes, use worktrees via `EnterWorktree` to isolate changes
+- For large fixes, delegate to subagents with `isolation: worktree` to work on an isolated copy of the repo
 
 ## Important Behaviors
 

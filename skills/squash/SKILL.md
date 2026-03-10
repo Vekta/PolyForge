@@ -111,15 +111,47 @@ Tests: passing
 
 Ask: "Push with `--force-with-lease`?" (only if branch already has a remote)
 
+### Step 6: Update PR Description
+
+After pushing, check if a PR exists for this branch:
+
+```bash
+gh pr view --json number,title,body 2>/dev/null
+```
+
+If a PR exists, update its body to reflect the new commit structure:
+
+1. Read the existing PR body with `gh pr view --json body`
+2. **Preserve the entire existing template** — many teams use PR templates with checkboxes, sections, and Jira links. Never remove or reformat these.
+3. Only update the sections that describe the changes (e.g., Summary, Changes, Description). Fill in checkboxes where appropriate (e.g., check "Bugfix" if it's a fix).
+4. If there's no obvious place for a commit list, add a `## Changes` section right after the summary.
+5. Append `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` at the bottom only if not already present.
+
+```bash
+gh pr edit --body "{updated body preserving template structure}"
+```
+
+**CRITICAL: Never overwrite the PR template.** The template belongs to the team. PolyForge fills it in — it does not replace it.
+
 ## Commit Message Format
 
-Use conventional commits for the squashed messages:
-- `feat(scope): description` — new functionality
-- `fix(scope): description` — bug fix
-- `refactor(scope): description` — restructuring without behavior change
-- `test(scope): description` — test additions/changes
-- `docs(scope): description` — documentation only
-- `chore(scope): description` — config, CI, dependencies
+Use conventional commits with a title AND a body for each squashed commit:
+
+```
+feat(scope): short description
+
+- What was added/changed and why
+- Key implementation details a reviewer should know
+- Any non-obvious decisions made
+```
+
+Types:
+- `feat(scope)` — new functionality
+- `fix(scope)` — bug fix
+- `refactor(scope)` — restructuring without behavior change
+- `test(scope)` — test additions/changes
+- `docs(scope)` — documentation only
+- `chore(scope)` — config, CI, dependencies
 
 ## Important Behaviors
 
