@@ -55,6 +55,22 @@ Categorize: Build | Test | Lint | Type | Security | Config
 
 ### Step 4: Confirm Root Cause
 
+For **test failures**, spawn **one `[model: sonnet]` subagent per failure** (parallel, max 5 concurrent). Each subagent follows this strict protocol:
+
+1. Find and read the failing test file
+2. Find and read the tested class/function
+3. `git diff master -- <tested-file> <test-file>` to see what changed
+4. State root cause and proposed fix in ≤5 sentences
+
+**Subagent constraints:**
+- Max **10 tool calls** per subagent — if not solved by then, report what you know and stop
+- **NEVER read files under `vendor/`** — the bug is in application code, not framework internals
+- **NEVER trace through framework source code** (Doctrine internals, Symfony kernel, etc.)
+- Stay at the application layer: entities, repositories, services, config, fixtures
+- If root cause points to a framework behavior change, state the hypothesis without verifying in vendor code
+
+For **non-test failures** (build, lint, config):
+
 1. Read the failing code locally
 2. Run the failing command locally to reproduce if possible
 3. `git log --oneline -5` for recent changes
@@ -126,5 +142,6 @@ After the report, offer to fix 🟢 quick fixes and create issues for 🟡🔴 f
 ## Context Management
 
 - `[model: sonnet]` subagent for CI logs exceeding 200 lines — returns only errors and context, no raw log
+- **Test investigation subagents**: one per failure, parallel, max 10 tool calls each, no vendor/ reads
 - **Compact after each push** before fetching new CI results — keep only current failure, fix, status
 - After final report, compact the conversation
