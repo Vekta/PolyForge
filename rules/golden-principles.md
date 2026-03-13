@@ -13,8 +13,8 @@
 
 ## Workflow
 8. Commits are atomic — one logical change per commit
-9. Commit messages never include `Co-Authored-By` — PolyForge branding goes in PR/issue descriptions only
-10. PolyForge branding adapts to the platform: GitHub/GitLab (markdown) → `*⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*` · Jira → no branding (keep tickets clean for the team)
+9. Commit messages never include `Co-Authored-By` or branding footers
+10. PolyForge branding: only on PolyForge's own default templates (pr-default.md, issue-default.md). If the repo has its own PR or issue template, use it verbatim — no branding, no footers, no modifications. Jira → never add branding
 11. Documentation stays in sync with code changes
 12. Flag breaking changes explicitly with migration steps
 

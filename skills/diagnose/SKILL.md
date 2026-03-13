@@ -5,72 +5,60 @@ description: Use when the user asks to investigate, diagnose, analyze, or unders
 
 # /diagnose — Problem Investigation
 
-You are PolyForge's diagnostician. Investigate a specific problem and determine root cause.
+You are PolyForge's diagnostician. Investigate a problem and determine root cause.
 
 ## Usage
 
 ```
 /diagnose "NullPointerException in UserService"
-/diagnose                                         Interactive — paste error/describe problem
-/diagnose --file src/services/auth.go:142         Investigate a specific code location
+/diagnose                                         Interactive — paste error
+/diagnose --file src/services/auth.go:142         Investigate specific location
 ```
 
 ## Process
 
-### Step 1: Understand the Problem
+### Step 1: Understand
 
-**If description/error provided:** Parse for exception type, file, line, stack trace, context.
-
-**If no arguments:** Ask: "What's the problem? (paste error, describe behavior, or point to a file)"
+**Error provided:** Parse exception type, file, line, stack trace.
+**No arguments:** Ask: "What's the problem? (paste error, describe behavior, or point to a file)"
 
 ### Step 2: Gather Context
 
-1. Read `CLAUDE.md` and `.claude/polyforge.json`
-2. Find relevant source code — follow stack trace or search by error message
-3. Read files involved + surrounding context (callers, dependencies)
-4. `git log -p --follow {file}` — was this recently changed?
-5. Check related tests — do they cover this case?
-6. Search existing issues: `gh issue list -S "{keywords}"`
+1. Find relevant source — follow stack trace or search by error message
+2. Read files + callers + dependencies
+3. `git log -p --follow {file}` — recently changed?
+4. Related tests — do they cover this case?
+5. Search existing issues: `gh issue list -S "{keywords}"`
 
-For problems spanning multiple modules: spawn a `[model: sonnet]` subagent for codebase search — returns only relevant file paths and code snippets.
+**Multi-module problem:** Spawn `[model: sonnet]` subagent for codebase search → returns: `{ "files": [{ "path": "", "relevance": "", "snippet": "" }] }`
 
 ### Step 3: Analyze
 
-- What triggers the problem? Trace the execution path
-- Is it reproducible? Can a test be written?
-- When was it introduced?
-- Is it expected behavior? Check business rules, docs, comments
-- Blast radius? How many users/flows affected?
+- Trigger? Trace execution path
+- Reproducible? Can a test be written?
+- When introduced? Blast radius?
+- Expected behavior? Check business rules, docs
 
-### Step 4: Present Diagnosis
+### Step 4: Diagnosis
 
 ```
 ## Diagnosis: {short title}
 
-**Verdict:** 🐛 Bug | ⚙️ Expected behavior | 🔧 Configuration issue | ⚠️ Edge case
+**Verdict:** 🐛 Bug | ⚙️ Expected | 🔧 Config issue | ⚠️ Edge case
 
 **Root cause:** {1-3 sentences}
 
-**Evidence:**
-- `{file}:{line}` — {what the code does vs what should happen}
+**Evidence:** `{file}:{line}` — {what happens vs what should}
 
-**Severity:** {critical | high | medium | low} — {justification}
+**Severity:** {critical|high|medium|low} — {justification}
 
-**Affected paths:** {user flow or API endpoint}
+**Affected paths:** {user flow or endpoint}
 
-**Suggested fix:** {concrete, actionable — not vague}
+**Suggested fix:** {concrete, actionable}
 ```
 
-### Step 5: Next Actions
+### Step 5: Actions
 
-1. Create issue → `/report-issue` with pre-filled context
-2. Fix now → `/fix` with the diagnosis as context
-3. Write a reproducing test first
-4. Not a bug — close investigation
-5. Need more info — investigate deeper
+(1) Create issue → `/report-issue` (2) Fix now → `/fix` (3) Write reproducing test (4) Not a bug (5) Investigate deeper
 
-## Context Management
-
-- `[model: sonnet]` subagent for multi-module searches — returns file paths + snippets only
-- Diagnosis verdict + evidence is the deliverable — keep context focused
-- After presenting the diagnosis, compact the conversation
+Compact after diagnosis — the verdict is the deliverable.

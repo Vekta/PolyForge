@@ -18,63 +18,46 @@ You are PolyForge's feature builder. Analyze requirements, plan, implement, and 
 
 ## Process
 
-### Step 1: Understand the Feature
+### Step 1: Understand
 
 ```bash
 gh issue view 42 --json title,body,labels,comments,assignees
 ```
 
-Read the FULL issue including comments — acceptance criteria and clarifications are often there.
+Read the FULL issue including comments — acceptance criteria are often there.
 
-### Step 2: Research & Plan
+### Step 2: Plan
 
-1. Read `CLAUDE.md` and `.claude/polyforge.json`
-2. Search the codebase for similar features — follow existing patterns
-3. Create a plan: files to create, files to modify, implementation order, parallelizable tasks
+Search codebase for similar features — follow existing patterns. Create plan: files to create/modify, implementation order, parallelizable tasks.
 
-**Preview mode (`--preview`):** Stop here. Ask: (1) Looks good → implement (2) Adjust → describe (3) Cancel
+**Preview mode (`--preview`):** Stop here. Ask: (1) Implement (2) Adjust (3) Cancel
 
-**After plan approval:** Save to `tmp/state-{issue}.json`:
-```json
-{ "issue": 42, "layers": ["schema","core","api","tests","docs"], "completed": [], "branch": "" }
-```
-Then compact — reload only from the state file.
+Save plan to `tmp/state-{issue}.json`: `{ "issue", "layers": [], "completed": [], "branch": "" }`
+Then compact — reload from state file.
 
-### Step 3: Create Branch
+### Step 3: Branch
 
 ```bash
 git checkout -b feat/{issue-number}-{short-description}
 ```
 
-### Step 4: Implement Incrementally
+### Step 4: Implement
 
 Build layer by layer: Schema → Core → API/Interface → Tests → Documentation. Commit after each logical unit.
 
-For features touching >3 files: delegate each layer to a `[model: sonnet]` subagent working on its file group. Subagents commit their layer and return a summary. Update `tmp/state-{issue}.json` after each layer.
+**Over 3 files per layer:** Delegate to `[model: sonnet]` subagent per layer. Subagent commits and returns summary as JSON: `{ "layer": "", "files": [], "summary": "" }`. Update state file after each layer.
 
-**Full auto:** Implement directly.
-**Semi-auto:** Show diff preview after each layer, ask "Continue? (y/n/edit)"
+**Full auto:** Implement directly. **Semi-auto:** Show diff preview per layer, ask "Continue? (y/n/edit)"
 
-### Step 5: Verification Pipeline
+### Step 5: Verify
 
-```bash
-{test command} 2>&1 | bash hooks/filter-test-output.sh
-{lint command}
-{typecheck command}
-{vulncheck command}
-```
-
-If any fails: fix automatically (up to 2 retries). Same error + same approach twice → switch strategy. After 3 total attempts, categorize each remaining failure:
-- 🟢 Quick fix → fix it now
-- 🟡 Needs investigation → create issue via `/report-issue`
-- 🔴 Pre-existing/infra → create issue via `/report-issue` tagged infra
-Never ignore failures.
+Run verification pipeline per @skills/shared/common-patterns.md
 
 ### Step 6: Clean Up Commits
 
 ```bash
 git reset --soft $(git merge-base HEAD origin/main)
-# Re-commit in 3-7 logical groups by staging files per group
+# Re-commit in 3-7 logical groups
 ```
 
 ### Step 7: Create PR
@@ -85,23 +68,11 @@ Follow @skills/shared/pr-template-guide.md
 gh pr create --title "feat: {description} (#{issue-number})" --body "..."
 ```
 
-### Step 8: Update Issue
+### Step 8: Update Issue + Watch CI
 
 ```bash
 gh issue comment 42 --body "Implementation submitted in PR #{pr-number}"
-# Jira: jira issue move {key} "In Review" && jira issue comment add {key} "PR #{pr-number}"
-```
-
-### Step 9: Watch CI
-
-```bash
 gh pr checks --watch
 ```
 
-CI fails → run `/fix-ci` automatically. Do not leave the PR with failing CI.
-
-## Context Management
-
-- After plan approval: compact, reload from `tmp/state-{issue}.json`
-- Subagents `[model: sonnet]` for feature layers touching >3 files — returns layer summary only
-- After PR is created, compact — the PR is the deliverable
+CI fails → `/fix-ci` automatically. Compact after PR — the PR is the deliverable.

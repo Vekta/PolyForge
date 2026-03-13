@@ -5,7 +5,7 @@ description: Use when the user asks to analyze, audit, review, or check code qua
 
 # /analyse-code — Codebase Analysis
 
-You are PolyForge's code analyst. Perform a thorough analysis and produce a prioritized report.
+You are PolyForge's code analyst. Produce a prioritized analysis report.
 
 ## Usage
 
@@ -13,50 +13,43 @@ You are PolyForge's code analyst. Perform a thorough analysis and produce a prio
 /analyse-code                        Analyze entire project
 /analyse-code src/                   Analyze specific directory
 /analyse-code --focus security       Focus on security only
-/analyse-code --focus performance    Focus on performance only
 ```
 
-## Analysis Categories
+## Categories
 
-1. **Architecture & Patterns** — violations, circular deps, god classes, tight coupling, leaky abstractions
-2. **Security** — hardcoded secrets, injection vectors (SQL/XSS/command), missing auth, CSRF, CORS, unvalidated input
-3. **Performance** — N+1 queries, unbounded queries, missing cache, memory leaks, sync ops that should be async
-4. **Code Quality** — dead code, duplication, high complexity, swallowed errors, magic numbers, TODO/FIXME inventory
-5. **Configuration** — env validation, Docker misconfig, CI gaps, outdated deps, dev deps in prod
-6. **Testing** — untested critical paths, meaningless assertions, flaky patterns, missing integration tests
+1. **Architecture** — violations, circular deps, god classes, tight coupling
+2. **Security** — secrets, injection vectors, missing auth, CSRF, unvalidated input
+3. **Performance** — N+1, unbounded queries, missing cache, memory leaks
+4. **Quality** — dead code, duplication, high complexity, swallowed errors, TODO inventory
+5. **Configuration** — env validation, Docker misconfig, CI gaps, outdated deps
+6. **Testing** — untested critical paths, meaningless assertions, flaky patterns
 
 ## Process
 
-### Step 1: Load Context
+### Step 1: Detect Scope
 
-Read `.claude/polyforge.json` and `CLAUDE.md`. Determine which categories are relevant to the stack.
+Determine which categories are relevant to the project stack (from pre-loaded config).
 
-### Step 2: Scan (MANDATORY parallel subagents)
+### Step 2: Scan
 
-For each relevant category, spawn a `[model: sonnet]` subagent scoped to its category:
-- Each subagent receives only its category's pattern definitions and relevant file types
-- Returns structured findings: `[{ file, line, category, severity, description, fix }]`
+**Under 50 source files:** Scan inline — no subagents. Analyze all categories sequentially.
 
-Simultaneously, spawn a `[model: haiku]` subagent to return file/directory list and count only.
+**Over 50 source files:** Spawn `[model: sonnet]` subagents only for relevant categories (skip irrelevant ones). Each returns structured JSON only:
+```json
+[{ "file": "", "line": 0, "category": "", "severity": "critical|high|medium|low", "description": "", "fix": "" }]
+```
 
-Run all subagents in parallel. Exclude `vendor/`, `node_modules/`, `tmp/`, `.git/`.
+Max 3 concurrent subagents. Exclude `vendor/`, `node_modules/`, `tmp/`, `.git/`.
 
-### Step 3: Generate Report
+### Step 3: Report
 
-Merge all subagent findings. Create `docs/ANALYSIS-{YYYY-MM-DD}.md` using the structure at @skills/analyse-code/report-template.md
+Merge findings into `docs/ANALYSIS-{YYYY-MM-DD}.md` using @skills/analyse-code/report-template.md
 
-If a previous `docs/ANALYSIS-*.md` exists, compare findings — mark `[NEW]` vs `[RECURRING]`.
+If previous `docs/ANALYSIS-*.md` exists, compare — mark `[NEW]` vs `[RECURRING]`.
 
-### Step 4: Post-Report Actions
+### Step 4: Actions
 
-Ask:
-"Report saved to `docs/ANALYSIS-{date}.md`. Found {N} issues ({critical} critical, {high} high). Create issues?
-(a) One issue per finding  (b) One issue for all  (c) One per category  (d) No — keep report only"
+Ask: "Found {N} issues ({critical} critical). Create issues?
+(a) One per finding  (b) One for all  (c) One per category  (d) Report only"
 
-If creating issues, use `/report-issue`.
-
-## Context Management
-
-- All category subagents run in parallel — each returns structured JSON findings only
-- Parent merges JSON and formats the report — no raw file content in parent context
-- After generating the report, compact the conversation — the report is the deliverable
+If creating issues → `/report-issue`. Compact after report.

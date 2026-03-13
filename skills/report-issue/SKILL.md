@@ -5,7 +5,7 @@ description: Use when the user wants to file a bug, create an issue, report a pr
 
 # /report-issue — Issue Detection & Reporting
 
-You are PolyForge's issue reporter. Detect problems and create well-structured issues in the project's tracker.
+You are PolyForge's issue reporter. Detect problems and create well-structured issues.
 
 ## Usage
 
@@ -17,72 +17,42 @@ You are PolyForge's issue reporter. Detect problems and create well-structured i
 
 ## Process
 
-### Step 1: Determine Issue Tracker
+### Step 1: Detect Tracker
 
-Read `.claude/polyforge.json` → `issueTracker.type`.
+Use pre-loaded config for `issueTracker.type`. If not configured: check `gh api repos/{owner}/{repo} --jq '.has_issues'`, then Jira env vars, then GitLab remote. Jira auth: @skills/report-issue/jira-auth.md
 
-If not configured: check `gh api repos/{owner}/{repo} --jq '.has_issues'`, then Jira env vars, then GitLab remote.
+### Step 2: Gather Details
 
-For Jira authentication and template discovery: see @skills/report-issue/jira-auth.md
+**Interactive** — ONE question at a time: (1) What's the problem? (2) Expected vs actual? (3) Affected code? (4) Severity?
 
-### Step 2: Gather Issue Details
+**Scan mode** — spawn `[model: sonnet]` subagent → returns JSON:
+```json
+[{ "file": "", "line": 0, "type": "", "severity": "", "description": "", "fix": "" }]
+```
+Present findings, let user pick which to create as issues.
 
-**Interactive mode** — ONE question at a time:
-1. What's the problem?
-2. Expected vs actual behavior?
-3. Which part of the codebase is affected?
-4. Severity? (critical / high / medium / low)
+### Step 3: Enrich
 
-**Scan mode** — spawn a `[model: sonnet]` subagent to analyze the directory and return findings:
-- Uncaught exceptions / missing error handling
-- TODO/FIXME comments with context
-- Dead code / unreachable branches
-- Performance anti-patterns (N+1, unbounded loops)
-- Security issues (hardcoded secrets, missing validation)
+Find file/line numbers, check `git blame`, search duplicates (`gh issue list -S "{keywords}"`), suggest severity.
 
-Present all findings as a list, let user pick which to create as issues.
-
-### Step 3: Enrich the Issue
-
-Before creating: find relevant file/line numbers, check git blame, search for duplicates (`gh issue list -S "{keywords}"`), suggest severity label.
-
-### Step 4: Check for Issue Templates
+### Step 4: Templates
 
 ```bash
-# GitHub
 ls .github/ISSUE_TEMPLATE/ 2>/dev/null
-cat .github/ISSUE_TEMPLATE/bug_report.md 2>/dev/null
-
-# GitLab
-ls .gitlab/issue_templates/ 2>/dev/null
 ```
 
-**If a template exists — NON-NEGOTIABLE:** Use VERBATIM, fill in all applicable fields, never delete sections. Append PolyForge footer.
+**Template exists:** Use VERBATIM — fill all fields, never delete sections. NEVER append branding or footers.
+**No template:** Use @skills/shared/issue-default.md
 
-**If no template:** Use default at @skills/shared/issue-default.md
-
-### Step 5: Create the Issue
+### Step 5: Create
 
 ```bash
-# Check for title prefix in polyforge.json → issueTracker.config.titlePrefix
-
-# GitHub
-gh issue create --title "{prefix} {title}" --body "{body}" --label "{severity},{type}"
-
-# Jira (CLI preferred, REST fallback — see @skills/report-issue/jira-auth.md)
-jira issue create --type "{type}" --summary "{title}" --body "{body}" --priority "{priority}"
-
-# GitLab
-glab issue create --title "{title}" --description "{body}" --label "{labels}"
+# Check titlePrefix in config
+# GitHub: gh issue create --title "{prefix} {title}" --body "{body}" --label "{severity},{type}"
+# Jira: jira issue create --type "{type}" --summary "{title}" --body "{body}" --priority "{priority}"
+# GitLab: glab issue create --title "{title}" --description "{body}" --label "{labels}"
 ```
 
 ### Step 6: Confirm
 
-Show full issue preview. Ask: "Create this issue? (y/n/edit)"
-
-Log created issues to `tmp/issues-log-{date}.md`.
-
-## Context Management
-
-- Scan mode: `[model: sonnet]` subagent for directory scanning — returns findings JSON only
-- After creating issues, compact the conversation
+Show preview. Ask: "Create this issue? (y/n/edit)". Log to `tmp/issues-log-{date}.md`. Compact after creation.

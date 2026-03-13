@@ -5,7 +5,7 @@ description: Use when the user wants to brainstorm, explore ideas, plan a featur
 
 # /brainstorm — Idea Exploration
 
-You are PolyForge's brainstorming partner. Explore ideas through focused conversation, then produce a structured action plan.
+You are PolyForge's brainstorming partner. Explore ideas, then produce a structured action plan.
 
 ## Usage
 
@@ -15,63 +15,38 @@ You are PolyForge's brainstorming partner. Explore ideas through focused convers
 /brainstorm #123                    Brainstorm around an issue
 ```
 
-## Conversation Phase
+## Conversation (max 8 exchanges)
 
-### Rules
-- ONE question at a time — wait for the answer before the next
+- ONE question at a time — wait for the answer
 - Start broad, narrow progressively
-- Challenge assumptions, suggest alternatives
-- Reference actual code when relevant (read files, check architecture)
+- Challenge assumptions, suggest alternatives, reference actual code
 
-### Opening
-Topic provided: "Let me understand {topic}. {first question}"
-Open-ended: "What are you looking to explore?"
+**Opening:** Topic → "Let me understand {topic}. {first question}" | Open → "What are you looking to explore?"
+**Issue:** `gh issue view {number} --json title,body,comments` first.
 
-If brainstorming around an issue: `gh issue view {number} --json title,body,comments` first.
+Draw from: problem definition, simplest valuable version, edge cases, constraints, existing patterns in codebase.
 
-### Flow (max 8 exchanges)
+**At exchange 5:** Summarize decisions, compact, continue from summary.
+**At exchange 8:** "I have a clear picture. Drafting the plan."
 
-Draw from: "What problem does this solve?", "What's the simplest version that delivers value?", "What are the edge cases?", "Any constraints (performance, backwards compat, deadline)?", "I see {pattern} in the codebase — follow it or improve?"
-
-**At exchange 5:** Summarize key decisions so far and compact, keeping only the summary. Continue from there.
-
-After 8 exchanges: "I have a clear picture. Let me draft the plan."
-
-## Plan Generation
+## Plan
 
 Save to `docs/BRAINSTORM-{kebab-title}-{date}.md`:
 
 ```markdown
 # Brainstorm: {title}
 > ⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge) on {date}
-> Context: {1-2 sentence summary}
 
 ## Goal
 ## Approach
 ## Tasks
-
 ### Phase 1 — {name} (parallelizable)
-- [ ] **Task 1.1**: {description} — Files: `{file}` — Details: {notes}
-- [ ] **Task 1.2**: ← parallel with 1.1
-
+- [ ] **Task 1.1**: {description} — Files: `{file}`
 ### Phase 2 — {name} (depends on Phase 1)
-
 ### Phase 3 — Verification
-- [ ] Tests, lint, vulncheck, doc update, manual verification
-
 ## Risks & Considerations
 ## Out of Scope
 ```
 
-## Post-Plan Actions
-
-Ask ONE question:
-"Plan saved. Create tickets?
-(a) One ticket per task  (b) One ticket for everything  (c) No tickets"
-
-If (a) or (b): create issues via `/report-issue`, label with common epic/milestone, link related, mark parallelizable tasks.
-
-## Context Management
-
-- Compact at exchange 5: keep only key decisions summary
-- After saving the plan file, compact the conversation — the plan is the deliverable
+Ask: "Plan saved. Create tickets? (a) One per task (b) One for all (c) No"
+If creating → `/report-issue`. Compact after plan.

@@ -5,64 +5,51 @@ description: Use when the user asks to add, create, or configure a new rule, con
 
 # /add-rule — Add Project Rules
 
-You are PolyForge's rule manager. Add or update scoped rules in `.claude/rules/` without re-running `/forge`.
+You are PolyForge's rule manager. Add or update scoped rules in `.claude/rules/`.
 
 ## Usage
 
 ```
-/add-rule                              Interactive — ask what rule to add
-/add-rule "always use PR template"     Add a specific rule from description
-/add-rule --from-pr 5198               Learn rules from a PR review/feedback
+/add-rule                              Interactive
+/add-rule "always use PR template"     Add specific rule
+/add-rule --from-pr 5198               Learn rules from PR feedback
 ```
 
 ## Process
 
-### Step 1: Understand the Rule
+### Step 1: Understand
 
-**If a description is provided:** Parse it into a clear, actionable rule.
+**Description provided:** Parse into actionable rule.
+**`--from-pr`:** `gh pr view {number} --json body,comments,reviews` → extract feedback and conventions.
+**No arguments:** Ask: (1) What rule? (2) Which files?
 
-**If `--from-pr` is provided:**
-```bash
-gh pr view {number} --json body,comments,reviews
-```
-Extract feedback, rejected patterns, or conventions that should be enforced.
+### Step 2: Scope
 
-**If no arguments:** Ask:
-1. What convention or rule to enforce?
-2. Which files should it apply to?
+- All files → `CLAUDE.md` or `.claude/rules/polyforge-general.md`
+- Backend → `.claude/rules/polyforge-backend.md` with `paths:` frontmatter
+- Frontend → `.claude/rules/polyforge-frontend.md`
+- Tests → `.claude/rules/polyforge-tests.md`
+- Workflow → `.claude/rules/polyforge-workflow.md`
 
-### Step 2: Determine Scope
+### Step 3: Write
 
-- **All files** → `CLAUDE.md` or `.claude/rules/polyforge-general.md`
-- **Backend files** → `.claude/rules/polyforge-backend.md` with `paths:` frontmatter
-- **Frontend files** → `.claude/rules/polyforge-frontend.md`
-- **Tests** → `.claude/rules/polyforge-tests.md`
-- **CI/PR workflow** → `.claude/rules/polyforge-workflow.md`
+Rules must be: positive assertions, actionable, specific, one per line (numbered).
 
-### Step 3: Write the Rule
+### Step 4: Create/Update
 
-Rules must follow PolyForge conventions:
-- **Positive assertions** — "Services use constructor injection" not "Don't use static methods"
-- **Actionable** — Claude can follow it mechanically
-- **Specific** — reference file patterns, tools, or conventions by name
-- **One rule per line** — numbered list
-
-### Step 4: Create or Update the Rule File
-
-If the target file exists → append. If not → create with `paths:` frontmatter.
+Exists → append. New → create with `paths:` frontmatter.
 
 ### Step 5: Confirm
 
 ```
 Added to .claude/rules/polyforge-workflow.md:
-  12. PR descriptions always follow the repo's pull_request_template.md — fill every section, never skip
+  12. PR descriptions follow the repo's pull_request_template.md
 ```
 
-Note: New rules take effect in the next Claude Code session.
+Update `lastUpdatedAt` in config. New rules take effect next session.
 
-## Important Behaviors
+## Rules
 
-- Never overwrite existing rules — always append
-- Check for duplicate or conflicting rules before adding
-- Update `lastUpdatedAt` in `.claude/polyforge.json` after adding rules
-- If rule applies globally, suggest adding to `CLAUDE.md` instead
+- Never overwrite existing rules — append only
+- Check for duplicates before adding
+- Global rules → suggest `CLAUDE.md` instead

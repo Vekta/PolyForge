@@ -15,88 +15,66 @@ You are PolyForge's PR reviewer. Review with a FRESH perspective — you are NOT
 /pr-review --focus security Focus on security aspects
 ```
 
-## Review Process
+## Process
 
-### Step 1: Gather PR Context (run all 4 in parallel)
+### Step 1: Gather PR Context (parallel)
 
 ```bash
 gh pr view {number} --json title,body,additions,deletions,files,commits,reviews,labels
-gh pr diff {number}
+gh pr diff {number} -- ':!*.lock' ':!vendor/' ':!*.generated.*'
 gh pr checks {number}
 gh api repos/{owner}/{repo}/pulls/{number}/comments
 ```
 
-### Step 2: Check CI/CD Status
+### Step 2: Check CI
 
 ```bash
-gh run list --branch {branch}
+gh run list --branch {branch} --limit 3
 gh run view {run-id} --log-failed 2>/dev/null | head -300
 ```
 
-If CI fails: report which jobs failed and why. Ask: "Fix CI failures automatically?"
+CI fails → report which jobs failed and why. Ask: "Fix CI failures automatically?"
 
-### Step 3: Code Review (MANDATORY subagent — always, no size condition)
+### Step 3: Code Review
 
-Spawn a `[model: sonnet]` subagent with isolated context to review the diff. The subagent checks:
+**Under 300 lines diff:** Review inline — no subagent needed.
 
-**Coherence & Completeness**
-- All related files present (no missing migrations, tests, configs)
-- No unresolved TODO/FIXME in the diff
-- Feature works end-to-end based on code flow
+**Over 300 lines diff:** Spawn `[model: sonnet]` subagent with the diff. Returns JSON only:
+```json
+[{ "file": "", "line": 0, "category": "critical|warning|suggestion", "msg": "" }]
+```
 
-**Code Quality**
-- Single responsibility, no duplication, consistent naming, complete error handling
+Review checklist (inline or subagent):
+- **Coherence**: all related files present, no unresolved TODO/FIXME, end-to-end flow works
+- **Quality**: single responsibility, no duplication, consistent naming, error handling
+- **Cross-file**: API contracts match, schema changes have migrations, test coverage matches
+- **Security**: no secrets, input validation on boundaries, no injection vectors
+- **Performance**: no N+1, no unbounded loops, indexes for new queries
 
-**Cross-File Consistency**
-- API contracts match between caller and callee
-- Schema changes have ORM/migration updates
-- Test coverage matches the changes
-
-**Security**
-- No hardcoded secrets, input validation on boundaries, no injection vectors
-
-**Performance**
-- No N+1 queries, no unbounded loops, indexes for new query patterns
-
-If diff > 500 lines: subagent summarizes findings per-file and returns only the summary.
-
-### Step 4: Generate Report
+### Step 4: Report
 
 ```markdown
 ## PR Review: #{number} — {title}
 
 ### CI Status
-- ✓ Build: passed
-- ✗ Lint: failed (2 errors)
+- ✓/✗ {check}: {status}
 
 ### Critical (must fix)
-- [ ] {finding with file:line reference}
+- [ ] {finding} — `{file}:{line}`
 
 ### Warnings (should fix)
-- [ ] {finding with file:line reference}
+- [ ] {finding} — `{file}:{line}`
 
 ### Suggestions (nice to have)
-- [ ] {finding with file:line reference}
+- [ ] {finding} — `{file}:{line}`
 
 ### What looks good
-- {positive feedback on well-written parts}
+- {positive feedback}
 ```
 
-### Step 5: Post-Review Actions
+### Step 5: Post-Review
 
-Ask ONE question:
-"Found {N} issues ({critical} critical, {warnings} warnings). What do you want to do?
-(a) Fix critical issues automatically
-(b) Fix all issues automatically
-(c) Just show the report — I'll fix manually
-(d) Post this review as a PR comment"
+Ask: "Found {N} issues ({critical} critical). Action?
+(a) Fix critical automatically  (b) Fix all  (c) Report only  (d) Post as PR comment"
 
-## Configuration
-
-Read `.claude/polyforge.json` for `autonomy`, `pipeline.prePR`, `project.linters`.
-
-## Context Management
-
-- Run Step 1 commands in parallel — they are independent
-- `[model: sonnet]` subagent for Step 3 — always mandatory, no size condition
-- After generating the report, compact the conversation — the report is the deliverable
+Compact after report — follow @skills/shared/common-patterns.md

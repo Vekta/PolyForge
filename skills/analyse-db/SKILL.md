@@ -17,56 +17,37 @@ You are PolyForge's database analyst. Produce comprehensive database documentati
 
 ## Process
 
-### Step 1: Read Configuration
+### Step 1: Detect Database
 
-Load `.claude/polyforge.json` for `database.type`, `database.connectionMethod`, `database.containerName`.
+Use pre-loaded config for `database.type`, `database.connectionMethod`, `database.containerName`.
 
-If no config: auto-detect from `docker-compose.yml`, `.env.*`, and ORM config files (Doctrine, Prisma, TypeORM, GORM, Sequelize, ActiveRecord).
+If not configured: auto-detect from `docker-compose.yml`, `.env.*`, ORM config files.
 
 ### Step 2: Extract Schema from Code
 
-Scan ORM entities/models and migration directories. Build a timeline of schema evolution. Identify common query patterns from repositories/services.
+Scan ORM entities/models and migration directories. Build schema evolution timeline. Identify query patterns from repositories/services.
 
 ### Step 3: Query Live Database (if accessible)
 
 **Ask first** — show masked connection string, confirm before connecting.
 
-For Docker: `docker compose ps` to check if container is running. Offer to start if stopped.
+Docker: `docker compose ps` to check container. Offer to start if stopped.
 
-Query templates by database type: see @skills/analyse-db/sql-queries.md
+Query templates: @skills/analyse-db/sql-queries.md
 
-### Step 4: Per-Table Analysis (parallel subagents)
+### Step 4: Per-Table Analysis
 
-For each table/collection, spawn a `[model: sonnet]` subagent with:
-- ORM entity code for that table
-- Migration history for that table
-- Query patterns referencing that table
-- Live schema data (if available)
+**Under 15 tables:** Analyze inline — no subagents.
 
-Each subagent returns:
+**Over 15 tables:** Batch tables into groups of 5-8, spawn `[model: sonnet]` subagent per batch (max 3 concurrent). Each returns:
 ```json
-{ "table": "users", "columns": [...], "indexes": [...], "relations": [...], "queryPatterns": [...], "enumValues": {}, "warnings": [] }
+[{ "table": "", "columns": [], "indexes": [], "relations": [], "queryPatterns": [], "enumValues": {}, "warnings": [] }]
 ```
-
-Run all table subagents in parallel.
 
 ### Step 5: Generate `docs/DB.md`
 
-Merge subagent results. Structure:
-- Overview: database type, table count, total estimated rows
-- Per-table: columns, indexes, relations, common query patterns, enum values
-- Relationship map (mermaid diagram)
-- Query anti-patterns detected
-- Large table warnings (>1M rows)
+Merge results. Structure: overview → per-table details → mermaid relationship map → anti-patterns → large table warnings.
 
-Cross-reference live data with ORM entities:
-- Flag tables in DB but missing from ORM (orphaned tables)
-- Flag entities in code but missing from DB (pending migrations)
+Cross-reference live data with ORM: flag orphaned tables (in DB, missing ORM) and pending migrations (in ORM, missing DB).
 
-Update existing `docs/DB.md` if it exists (backup to `tmp/` first). Add verification timestamp.
-
-## Context Management
-
-- All per-table analysis delegated to `[model: sonnet]` subagents — only structured JSON returned to parent
-- Load SQL templates on-demand from @skills/analyse-db/sql-queries.md based on detected DB type
-- After generating docs/DB.md, compact the conversation — the document is the deliverable
+Backup existing `docs/DB.md` to `tmp/`. Add verification timestamp. Compact after generation.

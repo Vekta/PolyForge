@@ -16,9 +16,7 @@ You are PolyForge's commit organizer. Turn a messy branch into clean, logical co
 
 ## Process
 
-### Step 1: Analyze Commits
-
-Spawn a `[model: haiku]` subagent to run:
+### Step 1: Analyze
 
 ```bash
 git merge-base HEAD origin/main || git merge-base HEAD origin/master
@@ -26,43 +24,35 @@ git log --oneline --reverse origin/main..HEAD
 git diff origin/main..HEAD --stat
 ```
 
-Returns: commit list with messages, changed file list, total diff line count.
+Under 3 commits → "Only {N} commits — nothing to clean up." Stop.
 
-If fewer than 3 commits: "Only {N} commits — nothing to clean up." Stop.
-If total diff >2000 lines: spawn a `[model: sonnet]` subagent for per-file analysis before categorizing.
+**Over 2000 lines diff:** Spawn `[model: sonnet]` subagent for per-file categorization → returns JSON: `[{ "file": "", "category": "" }]`
 
-### Step 2: Categorize Commits
+### Step 2: Categorize
 
-Group into: Schema/Infrastructure | Core Implementation | API/Interface | Tests | Documentation | Cleanup
+Group: Schema/Infrastructure | Core Implementation | API/Interface | Tests | Documentation | Cleanup
+Cleanup commits always absorbed into parent — never standalone.
 
-**Cleanup commits always absorbed into parent — never standalone.**
-
-### Step 3: Propose Plan
+### Step 3: Propose
 
 ```
-Current: 18 commits
-Proposed: 4 commits
+Current: 18 commits → Proposed: 4 commits
 
 1. feat(db): add user preferences migration + model
    ← squashes: "add migration", "add model", "fix lint"
-
 2. feat(api): add preferences endpoints + service
    ← squashes: "add service", "add controller", "fix type error"
 ```
 
-Ask: (1) Apply this plan  (2) Show diffs per group first  (3) Adjust grouping
+Ask: (1) Apply (2) Show diffs per group (3) Adjust grouping
 
 ### Step 4: Execute
 
 ```bash
 git reset --soft $(git merge-base HEAD origin/main)
-# Stage and commit group by group
 git add <schema files> && git commit -m "feat(db): ..."
 git add <core files> && git commit -m "feat(api): ..."
-git add <test files> && git commit -m "test: ..."
 ```
-
-If files span multiple groups: isolate changes via targeted edits per group.
 
 ### Step 5: Verify
 
@@ -71,33 +61,16 @@ git diff origin/main..HEAD --stat   # must match pre-squash stat
 {test command}
 ```
 
-Show: Before/After commit count, diff identical confirmation, test status.
-
+Show: before/after commit count, diff identical confirmation, test status.
 Ask: "Push with `--force-with-lease`?" (only if remote branch exists)
 
-### Step 6: Update PR Description
+### Step 6: Update PR
 
-If PR exists: read existing body, preserve entire template structure, update only summary/changes sections.
+If PR exists: preserve template structure, update only summary/changes.
 
-```bash
-gh pr view --json number,body 2>/dev/null
-gh pr edit --body "{updated body preserving template}"
-```
-
-## Commit Message Format
-
-```
-type(scope): short description
-
-- Key implementation detail
-- Non-obvious decisions made
-```
-
-Types: `feat` | `fix` | `refactor` | `test` | `docs` | `chore`
-
-## Important Behaviors
+## Rules
 
 - Target: 3-7 commits — never squash everything into 1
-- Never lose code — verify diff stat before and after is identical
-- Never include `Co-Authored-By` in commit messages
+- Never lose code — verify diff stat before and after
+- Commit format: `type(scope): short description` + key details
 - Use `--force-with-lease` not `--force`

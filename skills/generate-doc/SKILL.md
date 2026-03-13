@@ -5,7 +5,7 @@ description: Use when the user asks to generate, update, or refresh project docu
 
 # /generate-doc — Documentation Generator
 
-You are PolyForge's documentation generator. Create documentation optimized for Claude Code to understand the project efficiently.
+You are PolyForge's documentation generator. Create documentation optimized for Claude Code.
 
 ## Usage
 
@@ -24,45 +24,29 @@ You are PolyForge's documentation generator. Create documentation optimized for 
 
 ## Process
 
-### Step 1: Analyze Project (subagent)
+### Step 1: Analyze Project
 
-Spawn a `[model: sonnet]` subagent to scan the full project and return a structured summary:
-
+Spawn `[model: sonnet]` subagent to scan and return structured JSON only:
 ```json
-{
-  "stack": {}, "entryPoints": [], "architecture": "",
-  "patterns": [], "conventions": [], "envVars": [],
-  "knownQuirks": [], "keyFiles": [], "testFrameworks": []
-}
+{ "stack": {}, "entryPoints": [], "architecture": "", "patterns": [], "conventions": [], "envVars": [], "knownQuirks": [], "keyFiles": [], "testFrameworks": [] }
 ```
 
-The subagent reads: entry points, config files, main modules, existing docs. Returns structured JSON only.
+Subagent reads: entry points, config files, main modules, existing docs. **Discard raw scan data — use only the JSON.**
 
 ### Step 2: Handle Existing Files
 
-For each file to generate:
 - Doesn't exist → create
-- Exists with PolyForge marker (`Forged with PolyForge`) → update in-place
-- Exists without marker → ask: "(a) Merge (b) Keep existing, create separate file (c) Replace (backup to tmp/)"
+- Exists with PolyForge marker → update in-place
+- Exists without marker → ask: "(a) Merge (b) Keep + create separate (c) Replace (backup to tmp/)"
 
-### Step 3: Generate and Confirm
+### Step 3: Generate
 
-Show a preview with file names and line counts. Ask: "Generate? (y/n/preview {filename})"
+Show preview with file names and line counts. Ask: "Generate? (y/n/preview {filename})"
 
-Generate each file from the structured summary. After each file, compact keeping only the summary and remaining files to generate.
+Generate each file from structured summary. Compact between files.
 
-**CLAUDE.md** — include only: build/test/lint commands, architecture pattern, key non-obvious conventions, `@` refs to detailed docs. Include PolyForge commands list.
+**CLAUDE.md** — only: build/test/lint commands, architecture, non-obvious conventions, `@` refs to detailed docs. Include PolyForge commands list.
 
-**`.claude/rules/`** — scope with `paths:` frontmatter. Examples:
-- `polyforge-backend.md`: `src/**/*.php`, `internal/**/*.go`
-- `polyforge-frontend.md`: `src/**/*.tsx`, `src/**/*.ts`
-- `polyforge-tests.md`: `tests/**/*`, `**/*.test.*`, `**/*.spec.*`
+**`.claude/rules/`** — scope with `paths:` frontmatter. Positive assertions, one per line.
 
-Rules must be positive assertions, actionable, and one per line.
-
-## Context Management
-
-- Step 1 scan delegated entirely to `[model: sonnet]` subagent — structured JSON only returned
-- Generate files one at a time, compact between each file
-- CLAUDE.md MUST stay under 200 lines — non-negotiable
-- Update `lastUpdatedAt` in `.claude/polyforge.json` after generating
+Update `lastUpdatedAt` in `.claude/polyforge.json`. Compact after final file.
