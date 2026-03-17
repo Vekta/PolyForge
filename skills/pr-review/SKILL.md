@@ -1,23 +1,41 @@
 ---
 name: pr-review
-description: Use when the user asks to review a PR, check a pull request, look at changes before merge, or audit code quality in a PR. Reviews with a fresh subagent context to catch what the authoring agent missed — checks CI, coherence, security, and cross-file consistency.
+description: Use when the user asks to review a PR, check a pull request, review a GitHub issue, review a Jira ticket, look at changes before merge, or audit code quality. Auto-detects the item type (PR, GitHub issue, Jira ticket) and adapts the review accordingly.
 ---
 
-# /pr-review — Pull Request Review
+# /review — Universal Review
 
-You are PolyForge's PR reviewer. Review with a FRESH perspective — you are NOT the agent that wrote the code.
+You are PolyForge's reviewer. Review with a FRESH perspective — you are NOT the agent that wrote the code or filed the issue.
 
 ## Usage
 
 ```
-/pr-review                  Review the current branch's PR
-/pr-review #123             Review PR #123
-/pr-review --focus security Focus on security aspects
+/review                     Review the current branch's PR
+/review #123                Auto-detect: PR, GitHub issue, or Jira ticket
+/review PR #123             Explicitly review a PR
+/review issue #123          Explicitly review a GitHub issue
+/review PROJ-123            Review a Jira ticket
+/review --focus security    Focus on security aspects
 ```
 
-## Process
+## Step 1: Detect Item Type
 
-### Step 1: Gather PR Context (parallel)
+If not explicitly specified, auto-detect:
+
+```bash
+# Try PR first
+gh pr view {number} --json number,title 2>/dev/null && echo "TYPE:pr"
+# Try GitHub issue
+gh issue view {number} --json number,title 2>/dev/null && echo "TYPE:issue"
+```
+
+If input matches `[A-Z]+-\d+` pattern → Jira ticket. Use pre-loaded `issueTracker.config` for domain/credentials.
+
+---
+
+## PR Review
+
+### Gather Context (parallel)
 
 ```bash
 gh pr view {number} --json title,body,additions,deletions,files,commits,reviews,labels
@@ -26,7 +44,7 @@ gh pr checks {number}
 gh api repos/{owner}/{repo}/pulls/{number}/comments
 ```
 
-### Step 2: Check CI
+### Check CI
 
 ```bash
 gh run list --branch {branch} --limit 3
@@ -35,7 +53,7 @@ gh run view {run-id} --log-failed 2>/dev/null | head -300
 
 CI fails → report which jobs failed and why. Ask: "Fix CI failures automatically?"
 
-### Step 3: Code Review
+### Code Review
 
 **Under 300 lines diff:** Review inline — no subagent needed.
 
@@ -51,7 +69,7 @@ Review checklist (inline or subagent):
 - **Security**: no secrets, input validation on boundaries, no injection vectors
 - **Performance**: no N+1, no unbounded loops, indexes for new queries
 
-### Step 4: Report
+### Report
 
 ```markdown
 ## PR Review: #{number} — {title}
@@ -72,9 +90,118 @@ Review checklist (inline or subagent):
 - {positive feedback}
 ```
 
-### Step 5: Post-Review
+### Post-Review
 
 Ask: "Found {N} issues ({critical} critical). Action?
 (a) Fix critical automatically  (b) Fix all  (c) Report only  (d) Post as PR comment"
+
+---
+
+## GitHub Issue Review
+
+### Gather Context
+
+```bash
+gh issue view {number} --json title,body,labels,comments,assignees,state,milestone
+```
+
+### Check Issue Template Compliance
+
+Follow @skills/shared/issue-template-guide.md — verify the issue follows the repo's template (if one exists).
+
+### Review Checklist
+
+- **Clarity**: problem is clearly described, expected vs actual behavior stated
+- **Reproducibility**: steps to reproduce are present and specific
+- **Scope**: issue is focused on a single problem, not a bundle of unrelated items
+- **Context**: relevant code references, logs, screenshots, or error messages included
+- **Labels & severity**: appropriate labels assigned, severity matches the description
+- **Duplicates**: check for similar existing issues (`gh issue list -S "{keywords}"`)
+- **Actionability**: enough information for someone to start working on a fix
+
+### Report
+
+```markdown
+## Issue Review: #{number} — {title}
+
+### Completeness
+- ✓/✗ Clear description
+- ✓/✗ Reproduction steps
+- ✓/✗ Expected vs actual behavior
+- ✓/✗ Relevant context (logs, code refs)
+
+### Issues Found
+- [ ] {finding}
+
+### Suggestions
+- [ ] {suggestion to improve the issue}
+
+### Duplicate Check
+- {similar issues found, if any}
+```
+
+### Post-Review
+
+Ask: "Found {N} issues. Action?
+(a) Fix the issue descriptions  (b) Add missing info from codebase  (c) Report only  (d) Post as issue comment"
+
+---
+
+## Jira Ticket Review
+
+### Gather Context
+
+```bash
+curl -s "https://{domain}.atlassian.net/rest/api/3/issue/{key}" \
+  -H "Authorization: Basic {credentials}" | head -500
+# Also fetch comments
+curl -s "https://{domain}.atlassian.net/rest/api/3/issue/{key}/comment" \
+  -H "Authorization: Basic {credentials}" | head -300
+```
+
+### Check Ticket Compliance
+
+Query the project's issue type schema to verify required fields are filled:
+
+```bash
+curl -s "https://{domain}.atlassian.net/rest/api/3/issue/createmeta/{projectKey}/issuetypes" \
+  -H "Authorization: Basic {credentials}" | head -100
+```
+
+### Review Checklist
+
+- **Required fields**: all mandatory fields for the issue type are filled
+- **Acceptance criteria**: clearly defined and testable
+- **Story points / estimate**: present if the project uses estimation
+- **Priority**: set and consistent with description
+- **Links**: related tickets linked (blocks, is blocked by, relates to)
+- **Components**: assigned to the correct component(s)
+- **Sprint/epic**: properly placed in the backlog hierarchy
+- **Clarity**: description is clear enough for any team member to pick up
+
+### Report
+
+```markdown
+## Ticket Review: {key} — {summary}
+
+### Field Completeness
+- ✓/✗ {field}: {status}
+
+### Issues Found
+- [ ] {finding}
+
+### Suggestions
+- [ ] {suggestion to improve the ticket}
+
+### Related Tickets
+- {linked or potentially related tickets}
+```
+
+### Post-Review
+
+Ask: "Found {N} issues. Action?
+(a) Fix ticket fields via API  (b) Add missing context  (c) Report only"
+
+---
 
 Compact after report — follow @skills/shared/common-patterns.md
