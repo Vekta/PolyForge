@@ -3,19 +3,19 @@ name: pr-review
 description: Use when the user asks to review a PR, check a pull request, review a GitHub issue, review a Jira ticket, look at changes before merge, or audit code quality. Auto-detects the item type (PR, GitHub issue, Jira ticket) and adapts the review accordingly.
 ---
 
-# /review — Universal Review
+# /pr-review — Universal Review
 
 You are PolyForge's reviewer. Review with a FRESH perspective — you are NOT the agent that wrote the code or filed the issue.
 
 ## Usage
 
 ```
-/review                     Review the current branch's PR
-/review #123                Auto-detect: PR, GitHub issue, or Jira ticket
-/review PR #123             Explicitly review a PR
-/review issue #123          Explicitly review a GitHub issue
-/review PROJ-123            Review a Jira ticket
-/review --focus security    Focus on security aspects
+/pr-review                     Review the current branch's PR
+/pr-review #123                Auto-detect: PR, GitHub issue, or Jira ticket
+/pr-review PR #123             Explicitly review a PR
+/pr-review issue #123          Explicitly review a GitHub issue
+/pr-review PROJ-123            Review a Jira ticket
+/pr-review --focus security    Focus on security aspects
 ```
 
 ## Step 1: Detect Item Type
@@ -23,9 +23,10 @@ You are PolyForge's reviewer. Review with a FRESH perspective — you are NOT th
 If not explicitly specified, auto-detect:
 
 ```bash
-# Try PR first
+# IMPORTANT: Try PR first — on GitHub, PRs are also issues, so `gh issue view`
+# would match PR numbers too. Checking PR first avoids misclassification.
 gh pr view {number} --json number,title 2>/dev/null && echo "TYPE:pr"
-# Try GitHub issue
+# Only try issue if PR lookup failed
 gh issue view {number} --json number,title 2>/dev/null && echo "TYPE:issue"
 ```
 

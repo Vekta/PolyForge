@@ -13,7 +13,7 @@ Read `project.stack`, `project.testFrameworks`, and `project.linters` from pre-l
 | `go.mod` | `go test ./... 2>&1 \| bash hooks/filter-test-output.sh` |
 | `requirements.txt` / `pyproject.toml` | `python -m pytest 2>&1 \| bash hooks/filter-test-output.sh` |
 | `Gemfile` | `bundle exec rspec 2>&1 \| bash hooks/filter-test-output.sh` |
-| `build.gradle` / `pom.xml` | `./gradlew test` or `mvn test` |
+| `build.gradle` / `pom.xml` | `./gradlew test 2>&1 \| bash hooks/filter-test-output.sh` or `mvn test 2>&1 \| bash hooks/filter-test-output.sh` |
 
 ### Linting
 
