@@ -1,21 +1,21 @@
 ---
-name: pr-review
+name: review
 description: Use when the user asks to review a PR, check a pull request, review a GitHub issue, review a Jira ticket, look at changes before merge, or audit code quality. Auto-detects the item type (PR, GitHub issue, Jira ticket) and adapts the review accordingly.
 ---
 
-# /pr-review — Universal Review
+# /review — Universal Review
 
 You are PolyForge's reviewer. Review with a FRESH perspective — you are NOT the agent that wrote the code or filed the issue.
 
 ## Usage
 
 ```
-/pr-review                     Review the current branch's PR
-/pr-review #123                Auto-detect: PR, GitHub issue, or Jira ticket
-/pr-review PR #123             Explicitly review a PR
-/pr-review issue #123          Explicitly review a GitHub issue
-/pr-review PROJ-123            Review a Jira ticket
-/pr-review --focus security    Focus on security aspects
+/review                     Review the current branch's PR
+/review #123                Auto-detect: PR, GitHub issue, or Jira ticket
+/review PR #123             Explicitly review a PR
+/review issue #123          Explicitly review a GitHub issue
+/review PROJ-123            Review a Jira ticket
+/review --focus security    Focus on security aspects
 ```
 
 ## Step 1: Detect Item Type

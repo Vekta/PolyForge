@@ -30,7 +30,7 @@ describe('polyforge CLI', () => {
     const output = run(['help']);
     assert.match(output, /Usage/);
     assert.match(output, /\/forge/);
-    assert.match(output, /\/pr-review/);
+    assert.match(output, /\/review/);
     assert.match(output, /\/fix/);
     assert.match(output, /\/brainstorm/);
   });
@@ -60,7 +60,7 @@ describe('polyforge CLI', () => {
   it('lists available skills', () => {
     const output = run(['list']);
     assert.match(output, /init/);
-    assert.match(output, /pr-review/);
+    assert.match(output, /review/);
     assert.match(output, /fix/);
     assert.match(output, /brainstorm/);
   });
@@ -72,7 +72,7 @@ describe('polyforge CLI', () => {
 });
 
 describe('skill files', () => {
-  const skillDirs = ['init', 'pr-review', 'analyse-db', 'report-issue', 'feature', 'fix', 'fix-ci', 'brainstorm', 'analyse-code', 'generate-doc', 'squash', 'add-rule', 'diagnose'];
+  const skillDirs = ['init', 'review', 'analyse-db', 'report-issue', 'feature', 'fix', 'fix-ci', 'brainstorm', 'analyse-code', 'generate-doc', 'squash', 'add-rule', 'diagnose'];
 
   for (const skill of skillDirs) {
     it(`${skill}/SKILL.md exists`, () => {

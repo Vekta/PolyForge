@@ -215,7 +215,7 @@ Usage:
 
 After install, use these slash commands in Claude Code:
   /forge            Scan & configure current project
-  /pr-review       Review a PR (fresh context + CI check)
+  /review          Review a PR, issue, or Jira ticket
   /analyse-db      Analyze database schema
   /analyse-code    Full codebase analysis
   /report-issue    Detect & report issues

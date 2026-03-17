@@ -26,14 +26,14 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 2. If your project already has a `.claude/` directory with custom commands or skills, back it up first (`mv .claude .claude-backup`) — `/forge` will recreate it cleanly
 3. Open Claude Code in your project
 4. Run `/forge` — PolyForge scans your project and generates an optimized configuration
-5. Use any command: `/pr-review`, `/fix #123`, `/brainstorm`, etc.
+5. Use any command: `/review`, `/fix #123`, `/brainstorm`, etc.
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `/forge` | Scan project, detect stack/architecture, generate config interactively |
-| `/pr-review` | Review a PR with fresh context — checks CI, code quality, security |
+| `/review` | Review a PR, GitHub issue, or Jira ticket — checks CI, quality, security |
 | `/analyse-db` | Connect to DB (Docker or direct), generate `docs/DB.md` schema documentation |
 | `/analyse-code` | Full codebase analysis — patterns, security, performance, config issues |
 | `/diagnose` | Investigate a specific error or behavior — determine root cause and if it's a real bug |
@@ -97,7 +97,7 @@ Install everything or pick what you need:
 ```bash
 npx polyforgeai install                  # Install all skills & rules
 npx polyforgeai install --force          # Reinstall, overwriting existing
-npx polyforgeai add-skill pr-review fix  # Install specific skills only
+npx polyforgeai add-skill review fix     # Install specific skills only
 npx polyforgeai remove-skill analyse-db  # Remove a skill
 npx polyforgeai list                     # See available skills & install status
 ```
