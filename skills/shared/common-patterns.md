@@ -2,14 +2,55 @@
 
 ## Verification Pipeline
 
-```bash
-{test command} 2>&1 | bash hooks/filter-test-output.sh
-{lint command}
-{typecheck command}
-{vulncheck command}
-```
+Read `project.stack`, `project.testFrameworks`, and `project.linters` from pre-loaded `polyforge.json`. If not configured, auto-detect from project files and run ALL applicable tools:
 
-Fix failures automatically (max 2 retries). Same error + same approach twice → switch strategy. After 3 total attempts, categorize:
+### Tests
+
+| Detected by | Command |
+|---|---|
+| `package.json` | `npm test 2>&1 \| bash hooks/filter-test-output.sh` |
+| `composer.json` | `composer test 2>&1 \| bash hooks/filter-test-output.sh` or `php vendor/bin/phpunit 2>&1 \| bash hooks/filter-test-output.sh` |
+| `go.mod` | `go test ./... 2>&1 \| bash hooks/filter-test-output.sh` |
+| `requirements.txt` / `pyproject.toml` | `python -m pytest 2>&1 \| bash hooks/filter-test-output.sh` |
+| `Gemfile` | `bundle exec rspec 2>&1 \| bash hooks/filter-test-output.sh` |
+| `build.gradle` / `pom.xml` | `./gradlew test 2>&1 \| bash hooks/filter-test-output.sh` or `mvn test 2>&1 \| bash hooks/filter-test-output.sh` |
+
+### Linting
+
+| Detected by | Command |
+|---|---|
+| `.eslintrc.*` / `eslint.config.*` | `npx eslint .` |
+| `biome.json` / `biome.jsonc` | `npx biome check .` |
+| `.prettierrc*` | `npx prettier --check .` |
+| `phpstan.neon*` | `php vendor/bin/phpstan analyse` |
+| `phpcs.xml*` / `.phpcs.xml*` | `php vendor/bin/phpcs` |
+| `.golangci.yml` / `.golangci.yaml` | `golangci-lint run` |
+| `.flake8` / `setup.cfg` (flake8) | `flake8 .` |
+| `pyproject.toml` (ruff) | `ruff check .` |
+| `.rubocop.yml` | `bundle exec rubocop` |
+
+### Type Checking
+
+| Detected by | Command |
+|---|---|
+| `tsconfig.json` | `npx tsc --noEmit` |
+| `pyproject.toml` (mypy) / `mypy.ini` | `mypy .` |
+| `pyproject.toml` (pyright) | `pyright` |
+| `phpstan.neon*` | _(covered by linting above)_ |
+
+### Security / Vulnerability Check
+
+| Detected by | Command |
+|---|---|
+| `package.json` | `npm audit --audit-level=high` |
+| `composer.json` | `composer audit` |
+| `go.mod` | `govulncheck ./...` |
+| `requirements.txt` / `pyproject.toml` | `pip-audit` or `safety check` |
+| `Gemfile.lock` | `bundle audit check` |
+
+### Execution rules
+
+Run **all** matching tools — a project can have both ESLint and TypeScript, or PHPStan and PHPCS. Fix failures automatically (max 2 retries). Same error + same approach twice → switch strategy. After 3 total attempts, categorize:
 - 🟢 Quick fix → fix now
 - 🟡 Needs investigation → `/report-issue`
 - 🔴 Pre-existing/infra → `/report-issue` tagged infra

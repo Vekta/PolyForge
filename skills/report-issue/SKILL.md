@@ -37,12 +37,7 @@ Find file/line numbers, check `git blame`, search duplicates (`gh issue list -S 
 
 ### Step 4: Templates
 
-```bash
-ls .github/ISSUE_TEMPLATE/ 2>/dev/null
-```
-
-**Template exists:** Use VERBATIM — fill all fields, never delete sections. NEVER append branding or footers.
-**No template:** Use @skills/shared/issue-default.md
+Follow @skills/shared/issue-template-guide.md
 
 ### Step 5: Create
 
