@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Use when the user asks to implement, build, develop, or add a new feature by issue number (e.g. "feature #42", "implement #42", "build the user profile page"). Creates a branch, implements the feature, runs tests, and opens a PR — respecting the project's configured autonomy level.
+description: "Use when the user asks to implement, build, develop, or add a new feature by issue number (e.g. 'feature #42', 'implement #42', 'build the user profile page'). Creates a branch, implements the feature, runs tests, and opens a PR — respecting the project's configured autonomy level."
 ---
 
 # /feature — Feature Builder
@@ -32,7 +32,20 @@ Search codebase for similar features — follow existing patterns. Create plan: 
 
 **Preview mode (`--preview`):** Stop here. Ask: (1) Implement (2) Adjust (3) Cancel
 
-Save plan to `tmp/state-{issue}.json`: `{ "issue", "layers": [], "completed": [], "branch": "" }`
+Save plan to `tmp/state-{issue}.json`:
+```json
+{
+  "issue": "#42",
+  "layers": [
+    { "name": "schema", "files": ["prisma/schema.prisma"], "status": "pending" },
+    { "name": "core", "files": ["src/services/preferences.js"], "status": "pending" },
+    { "name": "api", "files": ["src/routes/preferences.js"], "status": "pending" },
+    { "name": "tests", "files": ["tests/preferences.test.js"], "status": "pending" }
+  ],
+  "completed": [],
+  "branch": "feat/42-user-preferences"
+}
+```
 Then compact — reload from state file.
 
 ### Step 3: Branch
@@ -45,9 +58,16 @@ git checkout -b feat/{issue-number}-{short-description}
 
 Build layer by layer: Schema → Core → API/Interface → Tests → Documentation. Commit after each logical unit.
 
-**Over 3 files per layer:** Delegate to `[model: sonnet]` subagent per layer. Subagent commits and returns summary as JSON: `{ "layer": "", "files": [], "summary": "" }`. Update state file after each layer.
+**Over 3 files per layer:** Delegate to `[model: sonnet]` subagent per layer. Subagent contract:
+```json
+// Input: { "layer": "core", "files": ["src/services/preferences.js", "src/models/preferences.js"], "context": "..." }
+// Output: { "layer": "core", "files": ["src/services/preferences.js", "src/models/preferences.js"], "summary": "Added preferences CRUD service", "status": "success" }
+```
+If a subagent fails or returns invalid JSON, retry once. If it fails again, implement that layer directly in the main agent. Update `tmp/state-{issue}.json` after each layer completes.
 
 **Full auto:** Implement directly. **Semi-auto:** Show diff preview per layer, ask "Continue? (y/n/edit)"
+
+**Rollback on critical failure:** If a layer breaks compilation or existing tests, revert that layer's changes (`git checkout -- <files>`), diagnose the issue, and retry with a different approach before proceeding.
 
 ### Step 5: Verify
 

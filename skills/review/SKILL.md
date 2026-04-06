@@ -1,6 +1,6 @@
 ---
 name: review
-description: Use when the user asks to review a PR, check a pull request, review a GitHub issue, review a Jira ticket, look at changes before merge, or audit code quality. Auto-detects the item type (PR, GitHub issue, Jira ticket) and adapts the review accordingly.
+description: "Use when the user asks to review a PR, check a pull request, review a GitHub issue, review a Jira ticket, look at changes before merge, or audit code quality. Analyzes code diffs for bugs, security issues, and style problems; checks CI status; verifies issue completeness and reproducibility; validates Jira field compliance. Produces a structured report with critical/warning/suggestion findings and offers to fix issues automatically or post as comments."
 ---
 
 # /review — Universal Review
@@ -63,7 +63,7 @@ CI fails → report which jobs failed and why. Ask: "Fix CI failures automatical
 [{ "file": "", "line": 0, "category": "critical|warning|suggestion", "msg": "" }]
 ```
 
-Review checklist (inline or subagent):
+**Review checklist** (applied in both inline and subagent modes):
 - **Coherence**: all related files present, no unresolved TODO/FIXME, end-to-end flow works
 - **Quality**: single responsibility, no duplication, consistent naming, error handling
 - **Cross-file**: API contracts match, schema changes have migrations, test coverage matches
@@ -91,7 +91,7 @@ Review checklist (inline or subagent):
 - {positive feedback}
 ```
 
-### Post-Review
+### Post-Review Actions
 
 Ask: "Found {N} issues ({critical} critical). Action?
 (a) Fix critical automatically  (b) Fix all  (c) Report only  (d) Post as PR comment"
@@ -106,18 +106,15 @@ Ask: "Found {N} issues ({critical} critical). Action?
 gh issue view {number} --json title,body,labels,comments,assignees,state,milestone
 ```
 
-### Check Issue Template Compliance
+### Review
 
-Follow @skills/shared/issue-template-guide.md — verify the issue follows the repo's template (if one exists).
-
-### Review Checklist
-
-- **Clarity**: problem is clearly described, expected vs actual behavior stated
+Check issue template compliance per @skills/shared/issue-template-guide.md, then evaluate:
+- **Clarity**: problem clearly described, expected vs actual behavior stated
 - **Reproducibility**: steps to reproduce are present and specific
-- **Scope**: issue is focused on a single problem, not a bundle of unrelated items
+- **Scope**: focused on a single problem, not a bundle of unrelated items
 - **Context**: relevant code references, logs, screenshots, or error messages included
-- **Labels & severity**: appropriate labels assigned, severity matches the description
-- **Duplicates**: check for similar existing issues (`gh issue list -S "{keywords}"`)
+- **Labels & severity**: appropriate labels assigned, severity matches description
+- **Duplicates**: check via `gh issue list -S "{keywords}"`
 - **Actionability**: enough information for someone to start working on a fix
 
 ### Report
@@ -141,7 +138,7 @@ Follow @skills/shared/issue-template-guide.md — verify the issue follows the r
 - {similar issues found, if any}
 ```
 
-### Post-Review
+### Post-Review Actions
 
 Ask: "Found {N} issues. Action?
 (a) Fix the issue descriptions  (b) Add missing info from codebase  (c) Report only  (d) Post as issue comment"
@@ -155,30 +152,25 @@ Ask: "Found {N} issues. Action?
 ```bash
 curl -s "https://{domain}.atlassian.net/rest/api/3/issue/{key}" \
   -H "Authorization: Basic {credentials}" | head -500
-# Also fetch comments
 curl -s "https://{domain}.atlassian.net/rest/api/3/issue/{key}/comment" \
   -H "Authorization: Basic {credentials}" | head -300
 ```
 
-### Check Ticket Compliance
+### Review
 
-Query the project's issue type schema to verify required fields are filled:
-
+Query project issue type schema for required fields:
 ```bash
 curl -s "https://{domain}.atlassian.net/rest/api/3/issue/createmeta/{projectKey}/issuetypes" \
   -H "Authorization: Basic {credentials}" | head -100
 ```
 
-### Review Checklist
-
-- **Required fields**: all mandatory fields for the issue type are filled
-- **Acceptance criteria**: clearly defined and testable
-- **Story points / estimate**: present if the project uses estimation
-- **Priority**: set and consistent with description
-- **Links**: related tickets linked (blocks, is blocked by, relates to)
-- **Components**: assigned to the correct component(s)
-- **Sprint/epic**: properly placed in the backlog hierarchy
-- **Clarity**: description is clear enough for any team member to pick up
+Evaluate:
+- **Required fields**: all mandatory fields filled per issue type schema
+- **Acceptance criteria**: defined and testable
+- **Estimates**: story points present if project uses estimation
+- **Priority + links**: priority matches description; related tickets linked
+- **Placement**: correct component, sprint/epic assignment
+- **Clarity**: actionable by any team member
 
 ### Report
 
@@ -198,7 +190,7 @@ curl -s "https://{domain}.atlassian.net/rest/api/3/issue/createmeta/{projectKey}
 - {linked or potentially related tickets}
 ```
 
-### Post-Review
+### Post-Review Actions
 
 Ask: "Found {N} issues. Action?
 (a) Fix ticket fields via API  (b) Add missing context  (c) Report only"
