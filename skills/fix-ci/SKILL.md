@@ -28,7 +28,7 @@ gh auth status
 gh pr checks
 ```
 
-All pass → report success and stop. Not authenticated → ask user to `gh auth login`.
+All pass → report success and stop. Not authenticated → call `AskUserQuestion` — "GitHub CLI is not authenticated." with options: "I'll run `gh auth login`" / "Skip CI check" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 ### Step 2: Inspect Failures
 
@@ -99,4 +99,4 @@ Follow @skills/shared/common-patterns.md for circuit breaker rules.
 *⚒ Forged with [PolyForge](https://github.com/Vekta/polyforge)*
 ```
 
-Offer to fix 🟢 and create issues for 🟡🔴. Compact after report.
+Call `AskUserQuestion` — "Next action?" with options: "Fix 🟢 now" / "Create issues for 🟡🔴" / "Both" / "Report only" / "Other". Compact after report.

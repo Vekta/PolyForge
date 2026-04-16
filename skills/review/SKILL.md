@@ -52,7 +52,7 @@ gh run list --branch {branch} --limit 3
 gh run view {run-id} --log-failed 2>/dev/null | head -300
 ```
 
-CI fails → report which jobs failed and why. Ask: "Fix CI failures automatically?"
+CI fails → report which jobs failed and why. Call `AskUserQuestion` — "Fix CI failures automatically?" with options: "Fix via /fix-ci" / "Report only" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 ### Code Review
 
@@ -93,8 +93,7 @@ Review checklist (inline or subagent):
 
 ### Post-Review
 
-Ask: "Found {N} issues ({critical} critical). Action?
-(a) Fix critical automatically  (b) Fix all  (c) Report only  (d) Post as PR comment"
+Call `AskUserQuestion` — "Found {N} issues ({critical} critical). Action?" with options: "Fix critical" / "Fix all" / "Report only" / "Post as PR comment" / "Other".
 
 ---
 
@@ -143,8 +142,7 @@ Follow @skills/shared/issue-template-guide.md — verify the issue follows the r
 
 ### Post-Review
 
-Ask: "Found {N} issues. Action?
-(a) Fix the issue descriptions  (b) Add missing info from codebase  (c) Report only  (d) Post as issue comment"
+Call `AskUserQuestion` — "Found {N} issues. Action?" with options: "Fix description" / "Add missing info from codebase" / "Report only" / "Post as issue comment" / "Other".
 
 ---
 
@@ -200,8 +198,7 @@ curl -s "https://{domain}.atlassian.net/rest/api/3/issue/createmeta/{projectKey}
 
 ### Post-Review
 
-Ask: "Found {N} issues. Action?
-(a) Fix ticket fields via API  (b) Add missing context  (c) Report only"
+Call `AskUserQuestion` — "Found {N} issues. Action?" with options: "Fix ticket fields via API" / "Add missing context" / "Report only" / "Other".
 
 ---
 

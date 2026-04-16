@@ -43,7 +43,7 @@ Then compact — reload from state file.
 git checkout -b fix/{issue-number}-{short-description}
 ```
 
-**Full auto:** Implement directly + write tests. **Semi-auto:** Show diff, ask "Apply? (y/n/edit)".
+**Full auto:** Implement directly + write tests. **Semi-auto:** Show diff, then call `AskUserQuestion` with options: "Apply" / "Edit" / "Abort" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 **Independent file groups (>3 files):** Delegate each group to `[model: sonnet]` subagent. Returns: `{ "group": "", "files": [], "summary": "" }`
 

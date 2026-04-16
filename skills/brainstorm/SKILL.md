@@ -48,5 +48,5 @@ Save to `docs/BRAINSTORM-{kebab-title}-{date}.md`:
 ## Out of Scope
 ```
 
-Ask: "Plan saved. Create tickets? (a) One per task (b) One for all (c) No"
+Call `AskUserQuestion` — "Plan saved. Create tickets?" with options: "One per task" / "One for all" / "No tickets" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 If creating → `/report-issue`. Compact after plan.

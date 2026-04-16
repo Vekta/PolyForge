@@ -29,9 +29,9 @@ Scan ORM entities/models and migration directories. Build schema evolution timel
 
 ### Step 3: Query Live Database (if accessible)
 
-**Ask first** — show masked connection string, confirm before connecting.
+**Ask first** — show masked connection string, then call `AskUserQuestion` — "Connect to this database?" with options: "Connect" / "Skip live query" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
-Docker: `docker compose ps` to check container. Offer to start if stopped.
+Docker: `docker compose ps` to check container. If stopped, call `AskUserQuestion` — "Container is stopped." with options: "Start it" / "Skip" / "Other".
 
 Query templates: @skills/analyse-db/sql-queries.md
 
