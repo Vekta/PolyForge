@@ -1,5 +1,40 @@
 # Shared Patterns
 
+## User Questions — AskUserQuestion ONLY
+
+**Every interactive question in every PolyForge skill MUST use the `AskUserQuestion` tool.** No exceptions.
+
+Banned formats (do NOT emit them in chat):
+- Numbered inline choices: `(1) Yes (2) No`, `1. ... 2. ...`
+- Letter choices: `(a) Merge (b) Replace`
+- Yes/no prompts: `Proceed? (y/n)`, `Apply? (y/n/edit)`, `Continue? (y/n)`
+- Markdown tables asking for confirmation
+- Any other ad-hoc choice menu rendered as text
+
+Correct pattern — one call per decision point:
+
+```
+AskUserQuestion({
+  questions: [{
+    question: "<short question>",
+    header: "<≤12 char header>",
+    multiSelect: false,
+    options: [
+      { label: "<short>", description: "<one-line detail>" },
+      { label: "<short>", description: "<one-line detail>" },
+      { label: "Other", description: "Let me describe a different option" }
+    ]
+  }]
+})
+```
+
+Rules:
+- ONE question per call — never batch multiple decisions
+- Always include an "Other" option so the user can free-type
+- Keep `header` ≤ 12 chars and `label` ≤ 5 words
+- For free-form input (no fixed choices), still use AskUserQuestion with a single "Describe" option + "Other"
+- Never pair a menu in chat with an AskUserQuestion — the tool IS the menu
+
 ## Verification Pipeline
 
 Read `project.stack`, `project.testFrameworks`, and `project.linters` from pre-loaded `polyforge.json`. If not configured, auto-detect from project files and run ALL applicable tools:

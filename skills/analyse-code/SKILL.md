@@ -49,7 +49,6 @@ If previous `docs/ANALYSIS-*.md` exists, compare — mark `[NEW]` vs `[RECURRING
 
 ### Step 4: Actions
 
-Ask: "Found {N} issues ({critical} critical). Create issues?
-(a) One per finding  (b) One for all  (c) One per category  (d) Report only"
+Call `AskUserQuestion` — "Found {N} issues ({critical} critical). Create issues?" with options: "One per finding" / "One for all" / "One per category" / "Report only" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 If creating issues → `/report-issue`. Compact after report.

@@ -21,7 +21,7 @@ You are PolyForge's rule manager. Add or update scoped rules in `.claude/rules/`
 
 **Description provided:** Parse into actionable rule.
 **`--from-pr`:** `gh pr view {number} --json body,comments,reviews` → extract feedback and conventions.
-**No arguments:** Ask: (1) What rule? (2) Which files?
+**No arguments:** Ask via two sequential `AskUserQuestion` calls — first "What rule?" (options: "Describe rule" / "Other"), then "Which files?" (options: "All files" / "Backend" / "Frontend" / "Tests" / "Workflow" / "Other"). Never inline `(1)/(2)` menus. See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 ### Step 2: Scope
 

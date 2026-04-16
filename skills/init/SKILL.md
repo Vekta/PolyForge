@@ -27,21 +27,23 @@ Subagent scans: package files, docker-compose, .env.*, framework configs, git lo
 
 If existing `.claude/` (not PolyForge): backup to `tmp/backup-{date}/.claude/`, inform user.
 
-## Phase 2: Questions (ONE AT A TIME)
+## Phase 2: Questions (ONE AT A TIME, via AskUserQuestion)
 
-Show detection summary, then ask only what wasn't detected:
+Show detection summary, then ask only what wasn't detected. **Every question is an `AskUserQuestion` tool call** — never emit inline `(1)/(2)` menus in chat. See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
-1. "Detected [stack]. Correct?" → (1) Yes (2) Yes + other repos (3) Correct
-2. "Architecture: [pattern]?" → (1) Yes (2) Not exactly
-3. "Issue tracker: [tracker]?" → (1) Yes (2) Different
-4. "Autonomy?" → (1) Full auto [Recommended] (2) Semi-auto
-5. (Full auto) "Grant full file access?" → (1) Yes → write `.claude/settings.json` NOW (2) No
-6. "Additional conventions?"
-7. "Generate docs now? (`/generate-doc`)"
+Sequence (one AskUserQuestion call each, wait for answer before the next):
+
+1. Stack confirmation — options: "Correct" / "Add other repos" / "Different" / "Other"
+2. Architecture pattern — options: detected pattern / "Not exactly" / "Other"
+3. Issue tracker — options: detected tracker / "Different" / "Other"
+4. Autonomy — options: "Full auto (recommended)" / "Semi-auto" / "Other"
+5. (Full auto only) File access — options: "Grant full access" / "Decline" / "Other"
+6. Additional conventions — options: "None" / "Describe" / "Other"
+7. Generate docs now — options: "Yes" / "Skip" / "Other"
 
 ## Phase 3: Generate
 
-Confirm file list before writing. Backup existing files to `tmp/backup-{date}/`.
+List the files to create (plain text, no table of choices). Then ask via AskUserQuestion: "Proceed with file generation?" — options: "Proceed" / "Adjust list" / "Cancel" / "Other". Backup existing files to `tmp/backup-{date}/`.
 
 Create:
 - `.claude/polyforge.json` — master config

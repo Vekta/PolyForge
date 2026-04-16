@@ -37,11 +37,11 @@ Subagent reads: entry points, config files, main modules, existing docs. **Disca
 
 - Doesn't exist → create
 - Exists with PolyForge marker → update in-place
-- Exists without marker → ask: "(a) Merge (b) Keep + create separate (c) Replace (backup to tmp/)"
+- Exists without marker → call `AskUserQuestion` with options: "Merge" / "Keep + create separate" / "Replace (backup to tmp/)" / "Other"
 
 ### Step 3: Generate
 
-Show preview with file names and line counts. Ask: "Generate? (y/n/preview {filename})"
+Show preview with file names and line counts. Then call `AskUserQuestion` — "Generate these files?" with options: "Generate all" / "Preview one file" / "Cancel" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 Generate each file from structured summary. Compact between files.
 

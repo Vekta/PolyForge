@@ -23,7 +23,7 @@ Use pre-loaded config for `issueTracker.type`. If not configured: check `gh api 
 
 ### Step 2: Gather Details
 
-**Interactive** — ONE question at a time: (1) What's the problem? (2) Expected vs actual? (3) Affected code? (4) Severity?
+**Interactive** — ONE `AskUserQuestion` call at a time (never inline numbered menus). Sequence: problem description, expected vs actual, affected code/files, severity (options: critical/high/medium/low/Other). See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 **Scan mode** — spawn `[model: sonnet]` subagent → returns JSON:
 ```json
@@ -50,4 +50,4 @@ Follow @skills/shared/issue-template-guide.md
 
 ### Step 6: Confirm
 
-Show preview. Ask: "Create this issue? (y/n/edit)". Log to `tmp/issues-log-{date}.md`. Compact after creation.
+Show preview. Then call `AskUserQuestion` — "Create this issue?" with options: "Create" / "Edit" / "Cancel" / "Other". Log to `tmp/issues-log-{date}.md`. Compact after creation.

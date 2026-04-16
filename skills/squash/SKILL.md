@@ -44,7 +44,7 @@ Current: 18 commits → Proposed: 4 commits
    ← squashes: "add service", "add controller", "fix type error"
 ```
 
-Ask: (1) Apply (2) Show diffs per group (3) Adjust grouping
+Call `AskUserQuestion` — "How should I proceed?" with options: "Apply" / "Show diffs per group" / "Adjust grouping" / "Cancel" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 ### Step 4: Execute
 
@@ -62,7 +62,7 @@ git diff origin/main..HEAD --stat   # must match pre-squash stat
 ```
 
 Show: before/after commit count, diff identical confirmation, test status.
-Ask: "Push with `--force-with-lease`?" (only if remote branch exists)
+Call `AskUserQuestion` — "Push with `--force-with-lease`?" with options: "Push now" / "Skip push" / "Other" (only if remote branch exists).
 
 ### Step 6: Update PR
 

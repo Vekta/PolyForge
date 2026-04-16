@@ -30,7 +30,7 @@ Read the FULL issue including comments — acceptance criteria are often there.
 
 Search codebase for similar features — follow existing patterns. Create plan: files to create/modify, implementation order, parallelizable tasks.
 
-**Preview mode (`--preview`):** Stop here. Ask: (1) Implement (2) Adjust (3) Cancel
+**Preview mode (`--preview`):** Stop here. Call `AskUserQuestion` with options: "Implement" / "Adjust" / "Cancel" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 Save plan to `tmp/state-{issue}.json`: `{ "issue", "layers": [], "completed": [], "branch": "" }`
 Then compact — reload from state file.
@@ -47,7 +47,7 @@ Build layer by layer: Schema → Core → API/Interface → Tests → Documentat
 
 **Over 3 files per layer:** Delegate to `[model: sonnet]` subagent per layer. Subagent commits and returns summary as JSON: `{ "layer": "", "files": [], "summary": "" }`. Update state file after each layer.
 
-**Full auto:** Implement directly. **Semi-auto:** Show diff preview per layer, ask "Continue? (y/n/edit)"
+**Full auto:** Implement directly. **Semi-auto:** Show diff preview per layer, then call `AskUserQuestion` with options: "Continue" / "Edit" / "Abort" / "Other".
 
 ### Step 5: Verify
 

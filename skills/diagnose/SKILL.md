@@ -20,7 +20,7 @@ You are PolyForge's diagnostician. Investigate a problem and determine root caus
 ### Step 1: Understand
 
 **Error provided:** Parse exception type, file, line, stack trace.
-**No arguments:** Ask: "What's the problem? (paste error, describe behavior, or point to a file)"
+**No arguments:** Call `AskUserQuestion` — "What's the problem?" with options: "Paste error" / "Describe behavior" / "Point to a file" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 ### Step 2: Gather Context
 
@@ -59,6 +59,6 @@ You are PolyForge's diagnostician. Investigate a problem and determine root caus
 
 ### Step 5: Actions
 
-(1) Create issue → `/report-issue` (2) Fix now → `/fix` (3) Write reproducing test (4) Not a bug (5) Investigate deeper
+Call `AskUserQuestion` — "Next action?" with options: "Create issue (/report-issue)" / "Fix now (/fix)" / "Write reproducing test" / "Not a bug" / "Investigate deeper" / "Other".
 
 Compact after diagnosis — the verdict is the deliverable.
