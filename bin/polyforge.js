@@ -22,6 +22,9 @@ const commands = {
   help,
   '--version': version,
   '-v': version,
+  '_routine-run': routineRun,
+  '_routines-status': routinesStatus,
+  '_routines-cleanup': routinesCleanup,
 };
 
 const command = process.argv[2] || 'help';
@@ -224,6 +227,50 @@ After install, use these slash commands in Claude Code:
   /brainstorm      Brainstorm a feature or fix
   /generate-doc    Generate Claude-optimized documentation
 `);
+}
+
+async function routineRun() {
+  const args = process.argv.slice(3);
+  const getFlag = (name) => {
+    const i = args.indexOf(name);
+    return i === -1 ? null : args[i + 1];
+  };
+  const name = getFlag('--name');
+  const projectRoot = getFlag('--project');
+  const dry = args.includes('--dry');
+  const runNow = args.includes('--run-now');
+  if (!name || !projectRoot) {
+    console.error('Usage: polyforge _routine-run --name <n> --project <path> [--dry] [--run-now]');
+    process.exit(2);
+  }
+  const { runRoutine } = await import('../lib/routines/runner.js');
+  const result = await runRoutine({ projectRoot, routineName: name, runNow, dry });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok ? 0 : 1);
+}
+
+async function routinesStatus() {
+  const { listInstalledPlists } = await import('../lib/routines/launchd.js');
+  const { summary } = await import('../lib/routines/telemetry.js');
+  const { isRateLimited } = await import('../lib/routines/rate-limit.js');
+  const plists = listInstalledPlists();
+  const tel = summary(300);
+  const rl = isRateLimited();
+  console.log(JSON.stringify({
+    installed: plists.map(p => p.routineName),
+    telemetry_5h: tel,
+    rate_limited: rl,
+    pause_file: existsSync(resolve(homedir(), '.polyforge', 'PAUSE')),
+  }, null, 2));
+}
+
+async function routinesCleanup() {
+  const projectRoot = process.argv[3] || process.cwd();
+  const { cleanupStaleWorktrees } = await import('../lib/routines/cleanup.js');
+  const { loadRoutinesConfig } = await import('../lib/routines/config.js');
+  const cfg = loadRoutinesConfig(projectRoot);
+  const result = cleanupStaleWorktrees(projectRoot, cfg);
+  console.log(JSON.stringify(result, null, 2));
 }
 
 function isSymlinkTo(linkPath, targetPath) {
