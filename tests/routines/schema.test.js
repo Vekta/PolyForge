@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateRoutinesConfig } from '../../lib/routines/schema.js';
+import { validateRoutinesConfig, isValidCron } from '../../lib/routines/schema.js';
 
 const minimalValid = {
   profile: 'standard',
@@ -76,5 +76,61 @@ describe('validateRoutinesConfig', () => {
     const cfg = { ...minimalValid, budget: { max_budget_usd_per_run: 0 } };
     const { valid } = validateRoutinesConfig(cfg);
     assert.equal(valid, false);
+  });
+
+  it('rejects duplicate routine names', () => {
+    const cfg = JSON.parse(JSON.stringify(minimalValid));
+    cfg.routines.push({ ...cfg.routines[0] });
+    const { valid, errors } = validateRoutinesConfig(cfg);
+    assert.equal(valid, false);
+    assert.ok(errors.some(e => e.includes('duplicate')));
+  });
+
+  it('rejects invalid cron in schedule', () => {
+    const cfg = JSON.parse(JSON.stringify(minimalValid));
+    cfg.routines[0].schedule = 'not a cron';
+    const { valid, errors } = validateRoutinesConfig(cfg);
+    assert.equal(valid, false);
+    assert.ok(errors.some(e => e.includes('schedule')));
+  });
+
+  it('requires auto_merge_allowlist when autonomy=auto-merge', () => {
+    const cfg = JSON.parse(JSON.stringify(minimalValid));
+    cfg.routines[0].autonomy = 'auto-merge';
+    const { valid, errors } = validateRoutinesConfig(cfg);
+    assert.equal(valid, false);
+    assert.ok(errors.some(e => e.includes('auto_merge_allowlist')));
+  });
+
+  it('accepts auto-merge when allowlist is non-empty', () => {
+    const cfg = JSON.parse(JSON.stringify(minimalValid));
+    cfg.routines[0].autonomy = 'auto-merge';
+    cfg.routines[0].auto_merge_allowlist = ['patch-version-bump'];
+    const { valid, errors } = validateRoutinesConfig(cfg);
+    assert.equal(valid, true, errors.join('; '));
+  });
+});
+
+describe('isValidCron', () => {
+  it('accepts "0 23 * * *"', () => {
+    assert.equal(isValidCron('0 23 * * *'), true);
+  });
+
+  it('accepts comma-separated numbers', () => {
+    assert.equal(isValidCron('0,15,30 * * * *'), true);
+  });
+
+  it('rejects 4-field cron', () => {
+    assert.equal(isValidCron('0 23 * *'), false);
+  });
+
+  it('rejects non-string input', () => {
+    assert.equal(isValidCron(null), false);
+    assert.equal(isValidCron(undefined), false);
+    assert.equal(isValidCron(42), false);
+  });
+
+  it('rejects ranges (unsupported)', () => {
+    assert.equal(isValidCron('0-30 * * * *'), false);
   });
 });

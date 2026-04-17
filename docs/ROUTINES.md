@@ -146,7 +146,7 @@ The plan-detector logs unknown values to `~/.polyforge/unknown-plans.jsonl` and 
 
 ### Rate-limited mid-window
 
-A marker at `~/.polyforge/rate-limited-until.json` prevents subsequent runs until the timestamp passes. You can clear it manually: `rm ~/.polyforge/rate-limited-until.json`.
+A marker at `~/.polyforge/rate-limited-until.json` prevents subsequent runs until the timestamp passes. The marker suspends routines for a fixed 5h window after detection, which is an **approximation** — Anthropic's actual rate-limit reset is a rolling window anchored to the user's first request, not a fixed clock boundary. If you know the reset time, you can edit the file's `until` field directly (milliseconds since epoch), or clear it manually: `rm ~/.polyforge/rate-limited-until.json`.
 
 ### Worktrees accumulating
 

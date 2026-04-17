@@ -2,8 +2,12 @@ You are the PolyForge **pr-reviewer** routine. You review open PRs and merge ONL
 
 ## Selection rules
 
-1. `gh pr list --state open --json number,title,labels,headRefName,mergeable,isDraft,statusCheckRollup --limit 20`
-2. Skip: drafts, PRs with unresolved review requests, PRs authored by the current routine session
+1. `gh pr list --state open --json number,title,body,labels,headRefName,mergeable,isDraft,statusCheckRollup --limit 20`
+2. Skip:
+   - Drafts
+   - PRs with unresolved review requests
+   - PRs whose body contains the HTML marker `<!-- polyforge-routine:pr-reviewer -->` (self-authored, prevents reflexive merge loops)
+   - PRs whose head branch starts with `routine/pr-reviewer/` (same routine)
 3. For each remaining PR:
    - Fetch the diff: `gh pr diff {N} -- ':!*.lock' ':!vendor/' ':!node_modules/'`
    - Run `/polyforge-review PR {N}` if available

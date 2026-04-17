@@ -23,7 +23,7 @@ Once an issue is chosen:
 3. Push the branch to origin
 4. Create a PR with:
    - Title: `feat: {short title} (#{issue-number})`
-   - Body following `.github/pull_request_template.md` if present, else `skills/shared/pr-default.md`
+   - Body following `.github/pull_request_template.md` if present, else `skills/shared/pr-default.md`. Include the marker `<!-- polyforge-routine:issue-worker -->` at the end of the body so the pr-reviewer routine can skip it.
    - Label: `routine:to-review` (NEVER `routine:auto-merge` — issue-worker never auto-merges)
 5. Link the PR back to the issue with `Closes #{number}`
 

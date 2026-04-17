@@ -12,15 +12,27 @@ Never combine these tiers in a single PR.
 
 ## Execution
 
-1. Run `npm outdated --json` and `npm audit --json` — parse the output
-2. Partition updates:
+1. Detect the package manager from lockfiles:
+   - `package-lock.json` → `npm`
+   - `yarn.lock` → `yarn`
+   - `pnpm-lock.yaml` → `pnpm`
+   - `bun.lock` / `bun.lockb` → `bun`
+   - None found → exit cleanly with `{"routine":"deps-security","action":"skip","reason":"no Node lockfile"}`
+
+2. Run the detected manager's outdated + audit:
+   - npm: `npm outdated --json`, `npm audit --json`
+   - yarn: `yarn outdated --json`, `yarn npm audit --json`
+   - pnpm: `pnpm outdated --format json`, `pnpm audit --json`
+   - bun: `bun outdated`, `bun audit` (or skip audit if unsupported by installed version)
+
+3. Partition updates:
    - `patch`: `current → patched` where only the patch version changes
    - `minor`: `current → patched` where the minor version changes
    - `major`: version bumps crossing the major
 3. For each non-empty partition, create a separate commit + PR:
 
 ### Patch PR (auto-merge candidate)
-- `npm install {pkg}@{patched}` for each patch
+- Install via the detected manager (e.g. `npm install {pkg}@{patched}` / `yarn add {pkg}@{patched}` / `pnpm add {pkg}@{patched}`)
 - Run tests — MUST pass
 - Commit: `fix(deps): patch bumps — {count} packages`
 - PR title: `fix(deps): patch bumps + security patches`
