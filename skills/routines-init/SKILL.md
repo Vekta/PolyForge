@@ -18,13 +18,16 @@ If `claude auth status` fails or is not logged in → stop with message "Please 
 
 ## Phase 1: Plan detection
 
-Run `node lib/routines/plan-detector.js` (via dynamic import from `bin/polyforge.js`) or inline:
-
 ```bash
-claude auth status
+npx polyforge _plan-detect
 ```
 
-Parse the JSON output. Map `subscriptionType` to the recommended profile via `lib/routines/profiles.js`. Known mappings:
+This outputs a JSON object:
+```json
+{"ok": true, "plan": "team", "profile": "unleashed", "fallback": false, "authMethod": "claude.ai"}
+```
+
+Known mappings (handled inside `_plan-detect`):
 
 | subscriptionType | Default profile |
 |---|---|
@@ -56,7 +59,11 @@ If "Other" → user types `HH:MM-HH:MM`.
 
 ## Phase 4: Build config
 
-Invoke `buildRoutinesConfig(profile, plan, window)` from `lib/routines/profiles.js`. Show the generated `routines` section. Call `AskUserQuestion`:
+```bash
+npx polyforge _routines-build-config --profile {profile} --plan {plan} --start {HH:MM} --end {HH:MM}
+```
+
+Show the generated `routines` section. Call `AskUserQuestion`:
 
 - Question: "Install this config?"
 - Options: "Install" / "Edit first" / "Cancel" / "Other"
@@ -67,11 +74,16 @@ If "Edit first" → show path `polyforge.json`, user edits, re-run validation.
 
 On confirmation:
 
-1. Write the `routines` section into `polyforge.json` via `writeRoutinesConfig()`
-2. For each enabled routine, call `installRoutinePlist()` from `lib/routines/launchd.js` — installs a plist under `~/Library/LaunchAgents/com.polyforge.routine.{name}.plist`
-3. Install the cleanup daemon plist (schedule: window.end + 60 min)
-4. Install the daily-reporter plist (schedule: window.end + 15 min)
-5. Run `launchctl load <plist>` for each (warn but don't fail if already loaded)
+1. Merge the generated `routines` block into `polyforge.json` (use Edit/Write tools — the validator runs at next load)
+2. For each enabled routine, install the plist:
+   ```bash
+   npx polyforge _routines-install-plist --name <name> --schedule "<cron>" --project "$(pwd)"
+   ```
+3. (Optional) Bootstrap the `ready` label used by `issue-worker`:
+   ```bash
+   gh label create ready --description "Issue ready to be picked up by automation" --color 0E8A16 2>/dev/null || true
+   ```
+4. Run `launchctl load <plist-path>` for each installed plist (warn but don't fail if already loaded)
 
 ## Phase 6: First-run safety
 

@@ -31,14 +31,17 @@ Dispatcher for CRUD operations on installed routines.
 
 ### suspend / resume
 
-- `suspend`: set `enabled: false` in config, call `launchctl unload` on the plist
-- `resume`: set `enabled: true`, call `launchctl load`
+- `suspend`: set `enabled: false` in `polyforge.json` routine entry, then `launchctl unload ~/Library/LaunchAgents/com.polyforge.routine.{name}.plist`
+- `resume`: set `enabled: true`, then `launchctl load ~/Library/LaunchAgents/com.polyforge.routine.{name}.plist`
 - Confirm via `AskUserQuestion` before executing
 
 ### delete
 
-- Call `uninstallRoutinePlist(name)` from `lib/routines/launchd.js`
-- Remove the routine from `polyforge.json`
+- Remove the routine from `polyforge.json` (Edit tool)
+- Uninstall the plist:
+  ```bash
+  npx polyforge _routines-uninstall-plist <name>
+  ```
 - Confirm via `AskUserQuestion` with explicit warning — this is irreversible
 
 ### run-now
@@ -57,8 +60,8 @@ Dispatcher for CRUD operations on installed routines.
 
 ### promote-from-dry
 
-- Only valid if the routine has had at least one successful dry run (check logs)
-- Flip `first_run_dry: false` in config via `updateRoutine()`
+- Only valid if the routine has had at least one successful dry run (check `~/.polyforge/logs/{name}.jsonl` for a `claude-result` event)
+- Flip `first_run_dry: false` in `polyforge.json` via Edit tool
 - Show the user what changed: "Next run will be LIVE (no dry mode)"
 
 ## Output

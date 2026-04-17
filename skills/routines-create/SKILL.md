@@ -64,13 +64,31 @@ Show the generated prompt.md preview. Call `AskUserQuestion`:
 
 ## Phase 5: Generate
 
-On confirmation:
+On confirmation, run the generator via a one-off Node invocation (the generator lives in `lib/routines/generator.js` as an ESM export):
 
-1. Call `generateRoutine({ projectRoot, scaffoldType, answers })` from `lib/routines/generator.js`
-   - Fills the scaffold, writes `templates/routines/{name}/prompt.md`
-   - Adds the routine entry to `polyforge.json`
-2. If plist install requested, call `installRoutinePlist({...})` from `lib/routines/launchd.js`
-3. New routine is marked `first_run_dry: true` by default — same safety net as bundled routines
+```bash
+node --input-type=module -e "
+  import('./lib/routines/generator.js').then(m =>
+    console.log(JSON.stringify(m.generateRoutine({
+      projectRoot: process.cwd(),
+      scaffoldType: '{scaffoldType}',
+      answers: {answersJson}
+    }), null, 2))
+  );
+"
+```
+
+This:
+- Fills the scaffold, writes `templates/routines/{name}/prompt.md`
+- Adds the routine entry to `polyforge.json`
+
+Then, if plist install requested:
+
+```bash
+npx polyforge _routines-install-plist --name {name} --schedule "{cron}" --project "$(pwd)"
+```
+
+New routine is marked `first_run_dry: true` by default — same safety net as bundled routines.
 
 ## Phase 6: Verify
 

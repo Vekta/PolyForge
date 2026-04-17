@@ -11,9 +11,8 @@ Read-only inspection of routine state.
 
 ```
 /routines-logs                            Summary of last 24h
-/routines-logs <name>                     Detailed log for one routine
+/routines-logs <name>                     Detailed log for one routine (last 50 events)
 /routines-logs --window 5h                Telemetry for rolling 5h window
-/routines-logs --tail <name>              Last 20 events for a routine
 /routines-logs --worktrees                List active routine worktrees
 /routines-logs --errors                   Last 10 errors across all routines
 ```
@@ -37,12 +36,17 @@ Runs: {N} | Total tokens: {in+out} | Cost ref: ${cost}
 ## Active worktrees: {count} (warn if >10)
 ```
 
-Data sources:
+Data sources (assemble via Read + bash):
 - `~/.polyforge/logs/*.jsonl` — per-routine events
 - `~/.polyforge/token-window.json` — telemetry
 - `~/.polyforge/rate-limited-until.json` — rate limit marker
 - `~/.polyforge/PAUSE` — pause file
 - `git worktree list --porcelain` in project — active worktrees
+
+Telemetry summary available via:
+```bash
+npx polyforge _routines-status
+```
 
 ## Detail view: `/routines-logs <name>`
 
@@ -62,11 +66,19 @@ Grep across all `*.jsonl` for `"type":"error"` | `"is_error":true` | `"preflight
 
 ## Worktrees view
 
-Call `listRoutineWorktrees(projectRoot)` from `lib/routines/worktree.js`. Cross-reference each worktree's branch with `gh pr list --head {branch}` to show PR state. Flag worktrees with no PR or PR closed >30 days as candidates for manual cleanup.
+```bash
+git worktree list --porcelain | grep -E '^(worktree|branch refs/heads/routine/)'
+```
+
+Cross-reference each worktree's branch with `gh pr list --head {branch}` to show PR state. Flag worktrees with no PR or PR closed >30 days as candidates for manual cleanup.
 
 ## Telemetry view
 
-Call `summary(windowMinutes)` from `lib/routines/telemetry.js`. Render tokens + cost per routine within the window.
+```bash
+npx polyforge _routines-status
+```
+
+Renders tokens + cost per routine for the rolling 5h window.
 
 ## Notes
 
