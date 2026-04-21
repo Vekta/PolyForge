@@ -39,6 +39,10 @@ const commands = {
   '_apply-migrations': applyMigrationsCmd,
   '_jira-transition': jiraTransitionCmd,
   '_jira-comment': jiraCommentCmd,
+  '_ci-mirror-sync': ciMirrorSyncCmd,
+  '_ci-mirror-run': ciMirrorRunCmd,
+  '_ci-fallback-verbs': ciFallbackVerbsCmd,
+  '_ci-learn': ciLearnCmd,
 };
 
 function flag(name) {
@@ -138,6 +142,78 @@ async function jiraCommentCmd() {
   const result = await postComment(domain, issueKey, body);
   console.log(JSON.stringify(result, null, 2));
   process.exit(result.ok || result.noop ? 0 : 1);
+}
+
+async function ciMirrorSyncCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const defaultBranch = flag('--default-branch') || 'main';
+  const { syncIfNeeded } = await import('../lib/ci-mirror-sync.js');
+  const result = syncIfNeeded(projectRoot, { defaultBranch });
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function ciMirrorRunCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.error('No polyforge.json, run /forge first');
+    process.exit(2);
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const commands = [
+    ...(config.pipeline?.ciMirror?.commands || []),
+    ...(config.pipeline?.ciMirror?.learnedCommands || []),
+  ];
+  if (commands.length === 0) {
+    const { detectFallbackCommands } = await import('../lib/fallback-verbs.js');
+    const fb = detectFallbackCommands(projectRoot);
+    commands.push(...fb.commands);
+    console.error(`[ci-mirror] no ciMirror.commands — using fallback (detected ${fb.detected.join(', ') || 'none'})`);
+  }
+  const { runCiMirror } = await import('../lib/ci-mirror-runner.js');
+  const result = runCiMirror(commands, { cwd: projectRoot });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok ? 0 : 1);
+}
+
+async function ciFallbackVerbsCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const { detectFallbackCommands } = await import('../lib/fallback-verbs.js');
+  const result = detectFallbackCommands(projectRoot);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function ciLearnCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const prNumber = flag('--pr');
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  const config = existsSync(configPath) ? JSON.parse(readFileSync(configPath, 'utf-8')) : {};
+  const userExclude = config?.pipeline?.ciMirror?.excludePatterns || [];
+  const { fetchFailedRunLog, extractFailingCommand, shouldLearn, appendLearnedCommand } = await import('../lib/ci-failure-extractor.js');
+  const fetched = fetchFailedRunLog(projectRoot, prNumber);
+  if (!fetched) {
+    console.log(JSON.stringify({ ok: false, reason: 'no-failed-run-found' }, null, 2));
+    return;
+  }
+  const cmd = extractFailingCommand(fetched.log);
+  if (!cmd) {
+    console.log(JSON.stringify({ ok: false, reason: 'no-command-extracted', runId: fetched.runId }, null, 2));
+    return;
+  }
+  if (!shouldLearn(cmd, userExclude)) {
+    console.log(JSON.stringify({ ok: false, reason: 'excluded-pattern', cmd }, null, 2));
+    return;
+  }
+  if (config?.pipeline?.ciMirror?.learningConsent === 'declined') {
+    console.log(JSON.stringify({ ok: false, reason: 'consent-declined', cmd }, null, 2));
+    return;
+  }
+  const result = appendLearnedCommand({
+    projectRoot,
+    cmd,
+    fromRunUrl: `https://github.com/.../actions/runs/${fetched.runId}`,
+  });
+  console.log(JSON.stringify({ ok: true, cmd, runId: fetched.runId, ...result }, null, 2));
 }
 
 async function applyMigrationsCmd() {

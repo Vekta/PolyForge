@@ -72,9 +72,26 @@ Build layer by layer: Schema → Core → API/Interface → Tests → Documentat
 
 **Full auto:** Implement directly. **Semi-auto:** Show diff preview per layer, then call `AskUserQuestion` with options: "Continue" / "Edit" / "Abort" / "Other".
 
-### Step 5: Verify
+### Step 5: Verify — CI mirror pre-push
 
-Run verification pipeline per @skills/shared/common-patterns.md
+Run the project's actual CI commands locally before pushing. PolyForge handles this via:
+
+```bash
+# Hash-gated sync: only re-parse workflows if they changed
+BRANCH=$(jq -r '.git.defaultBranch // "main"' polyforge.json)
+npx polyforge _ci-mirror-sync --project "$(pwd)" --default-branch "$BRANCH"
+
+# Run the mirrored commands (ciMirror.commands[] ∪ learnedCommands[])
+npx polyforge _ci-mirror-run --project "$(pwd)"
+```
+
+If `_ci-mirror-run` exits non-zero, enter an **auto-fix loop** (max 3 retries):
+1. Analyze the failing command's stderr/stdout (first failing step)
+2. Apply minimal fix
+3. Re-run `_ci-mirror-run`
+4. If still failing after 3 retries → Step 9 (Terminal escalation)
+
+If `ciMirror.commands` is empty (no CI detected), the runner falls back to auto-detected verbs via `_ci-fallback-verbs` (package.json/composer.json/go.mod/pyproject.toml/Gemfile/Cargo.toml). See @skills/shared/common-patterns.md for the fallback table.
 
 ### Step 6: Clean Up Commits
 

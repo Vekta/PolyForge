@@ -62,9 +62,17 @@ git checkout -b fix/{issue-number}-{short-description} origin/"$BASE"
 
 **Independent file groups (>3 files):** Delegate each group to `[model: sonnet]` subagent. Returns: `{ "group": "", "files": [], "summary": "" }`
 
-### Step 4: Verify
+### Step 4: Verify — CI mirror pre-push
 
-Run verification pipeline per @skills/shared/common-patterns.md
+```bash
+BRANCH=$(jq -r '.git.defaultBranch // "main"' polyforge.json)
+npx polyforge _ci-mirror-sync --project "$(pwd)" --default-branch "$BRANCH"
+npx polyforge _ci-mirror-run --project "$(pwd)"
+```
+
+On failure: auto-fix loop (max 3 retries). Still failing → Step 7 (Terminal escalation).
+
+Fallback verbs (package.json/composer.json/go.mod/etc.) kick in if no CI config detected.
 
 ### Step 5: Clean Up + PR
 
