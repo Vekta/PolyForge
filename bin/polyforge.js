@@ -22,6 +22,7 @@ const commands = {
   help,
   '--version': version,
   '-v': version,
+  // Routines (PR #4)
   '_routine-run': routineRun,
   '_routines-status': routinesStatus,
   '_routines-cleanup': routinesCleanup,
@@ -29,7 +30,103 @@ const commands = {
   '_routines-build-config': routinesBuildConfig,
   '_routines-install-plist': routinesInstallPlist,
   '_routines-uninstall-plist': routinesUninstallPlist,
+  // Dev workflow sync (PR #5 — this branch)
+  '_resolve-default-branch': resolveDefaultBranchCmd,
+  '_parse-workflows': parseWorkflowsCmd,
+  '_detect-parallelism': detectParallelismCmd,
+  '_fetch-jira-statuses': fetchJiraStatusesCmd,
+  '_detect-migrations': detectMigrationsCmd,
+  '_apply-migrations': applyMigrationsCmd,
 };
+
+function flag(name) {
+  const i = process.argv.indexOf(name);
+  return i === -1 ? null : process.argv[i + 1];
+}
+
+function positional(index) {
+  return process.argv[3 + index];
+}
+
+async function resolveDefaultBranchCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const { resolveDefaultBranch } = await import('../lib/default-branch.js');
+  const result = resolveDefaultBranch(projectRoot);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function parseWorkflowsCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const defaultBranch = flag('--default-branch') || 'main';
+  const { parseWorkflows } = await import('../lib/workflow-parser.js');
+  const { parseGitlabCI } = await import('../lib/workflow-parser-gitlab.js');
+  const gh = parseWorkflows(projectRoot, { defaultBranch });
+  const gl = parseGitlabCI(projectRoot);
+  console.log(JSON.stringify({ github: gh, gitlab: gl }, null, 2));
+}
+
+async function detectParallelismCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const { detectParallelism } = await import('../lib/parallelism-detector.js');
+  const result = detectParallelism(projectRoot);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function fetchJiraStatusesCmd() {
+  const domain = flag('--domain');
+  const projectKey = flag('--project-key');
+  const email = flag('--email') || process.env.JIRA_EMAIL;
+  const apiToken = process.env.JIRA_API_TOKEN;
+  if (!domain || !projectKey) {
+    console.error('Usage: polyforge _fetch-jira-statuses --domain <d> --project-key <K> [--email <e>]');
+    console.error('  Requires JIRA_API_TOKEN env var (and JIRA_EMAIL if not passed via --email)');
+    process.exit(2);
+  }
+  const { fetchProjectStatuses } = await import('../lib/jira-statuses.js');
+  try {
+    const result = await fetchProjectStatuses({ domain, projectKey, email, apiToken });
+    console.log(JSON.stringify(result, null, 2));
+  } catch (e) {
+    console.log(JSON.stringify({ ok: false, error: e.message }, null, 2));
+    process.exit(1);
+  }
+}
+
+async function detectMigrationsCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.log(JSON.stringify({ migrations: [], reason: 'no polyforge.json' }, null, 2));
+    return;
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const { detectNeededMigrations, applyMigrations, computeDiff, assertConfigClean } = await import('../lib/config/migrator.js');
+  const clean = assertConfigClean(projectRoot);
+  const migrations = detectNeededMigrations(config);
+  const after = applyMigrations(config, migrations);
+  const diff = computeDiff(config, after);
+  console.log(JSON.stringify({ clean, migrations, diff: diff.diff, changed: diff.changed }, null, 2));
+}
+
+async function applyMigrationsCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.error('No polyforge.json found');
+    process.exit(2);
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const { detectNeededMigrations, applyMigrations, atomicWriteConfig, assertConfigClean } = await import('../lib/config/migrator.js');
+  const clean = assertConfigClean(projectRoot);
+  if (!clean.clean) {
+    console.error(`polyforge.json has uncommitted changes. Commit or stash first.\n${clean.status || ''}`);
+    process.exit(3);
+  }
+  const migrations = detectNeededMigrations(config);
+  const next = applyMigrations(config, migrations);
+  atomicWriteConfig(projectRoot, next);
+  console.log(JSON.stringify({ applied: migrations.map(m => m.id), written: true }, null, 2));
+}
 
 const command = process.argv[2] || 'help';
 
