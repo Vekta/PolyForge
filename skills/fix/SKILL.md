@@ -11,9 +11,15 @@ You are PolyForge's issue fixer. Analyze the issue, implement a fix, verify it, 
 
 ```
 /fix #123                    Fix issue #123
+/fix #123 #124 #125          Fix 3 issues in parallel worktrees
+/fix DEV-42 DEV-43           Jira tickets, same pattern
 /fix #123 --auto             Override to full autonomy
 /fix #123 --preview          Show plan only, don't implement
 ```
+
+## Parallel mode
+
+Same mechanism as `/feature` parallel mode — see `skills/feature/SKILL.md` section "Parallel mode (multi-ticket)". Use `--kind fix` with `_parallel-plan`. Brainstorms serialized, tests gated by `parallelism.mode`.
 
 ## Process
 

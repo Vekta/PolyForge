@@ -43,6 +43,10 @@ const commands = {
   '_ci-mirror-run': ciMirrorRunCmd,
   '_ci-fallback-verbs': ciFallbackVerbsCmd,
   '_ci-learn': ciLearnCmd,
+  '_parallel-plan': parallelPlanCmd,
+  '_parallel-create-worktrees': parallelCreateWorktreesCmd,
+  '_test-lock-acquire': testLockAcquireCmd,
+  '_test-lock-release': testLockReleaseCmd,
 };
 
 function flag(name) {
@@ -214,6 +218,55 @@ async function ciLearnCmd() {
     fromRunUrl: `https://github.com/.../actions/runs/${fetched.runId}`,
   });
   console.log(JSON.stringify({ ok: true, cmd, runId: fetched.runId, ...result }, null, 2));
+}
+
+async function parallelPlanCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const kind = flag('--kind') || 'fix';
+  const ticketsRaw = flag('--tickets') || '';
+  const ticketArgs = ticketsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.error('No polyforge.json, run /forge first');
+    process.exit(2);
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const { parseTicketList, planExecution } = await import('../lib/parallel-orchestrator.js');
+  const tickets = parseTicketList(ticketArgs);
+  if (tickets.length === 0) {
+    console.error('No valid tickets parsed from --tickets. Formats: #123 or PROJ-123');
+    process.exit(2);
+  }
+  const plan = await planExecution({ projectRoot, config, tickets, kind });
+  console.log(JSON.stringify(plan, null, 2));
+}
+
+async function parallelCreateWorktreesCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const planJson = flag('--plan');
+  if (!planJson) {
+    console.error('Usage: polyforge _parallel-create-worktrees --project <p> --plan \'[{...}]\'');
+    process.exit(2);
+  }
+  const plan = JSON.parse(planJson);
+  const { createWorktreesForPlan } = await import('../lib/parallel-orchestrator.js');
+  const results = createWorktreesForPlan({ projectRoot, plan });
+  console.log(JSON.stringify(results, null, 2));
+}
+
+async function testLockAcquireCmd() {
+  const owner = flag('--owner') || 'cli';
+  const timeoutMs = Number(flag('--timeout-ms')) || undefined;
+  const { acquireTestLock } = await import('../lib/test-lock.js');
+  const result = await acquireTestLock({ owner, timeoutMs });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.acquired ? 0 : 1);
+}
+
+async function testLockReleaseCmd() {
+  const { releaseTestLock } = await import('../lib/test-lock.js');
+  const released = releaseTestLock();
+  console.log(JSON.stringify({ released }, null, 2));
 }
 
 async function applyMigrationsCmd() {
