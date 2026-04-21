@@ -30,7 +30,7 @@ gh pr checks
 
 All pass → report success and stop. Not authenticated → call `AskUserQuestion` — "GitHub CLI is not authenticated." with options: "I'll run `gh auth login`" / "Skip CI check" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
-### Step 2: Inspect Failures
+### Step 2: Inspect Failures + Learn
 
 ```bash
 gh run view <run-id>
@@ -40,6 +40,26 @@ gh run view <run-id> --log-failed 2>/dev/null | head -300
 Categorize: Build | Test | Lint | Type | Security | Config
 
 **Logs over 200 lines:** Spawn `[model: sonnet]` subagent → returns JSON: `{ "error": "", "command": "", "files": [{ "path": "", "line": 0 }] }`
+
+#### Learning loop (informed consent)
+
+After extracting the failing command, check if it's **not already** in `pipeline.ciMirror.commands[]` or `learnedCommands[]`. If it's a new command AND not matching exclude patterns:
+
+1. Read `pipeline.ciMirror.learningConsent` from `polyforge.json`:
+   - `"granted"` → proceed to step 2
+   - `"declined"` → skip learning, go to Step 3
+   - `"unasked"` → call `AskUserQuestion`:
+     > "The CI command `{cmd}` failed and isn't currently mirrored locally. Learning it means it'll run locally before your next push, catching the same failure earlier. This requires the PolyForge routines framework to be installed (the learning-consolidator routine aggregates learned commands nightly into a config PR)."
+     Options: "Install routines + learn" / "Learn only (write JSONL, manual consolidation)" / "Skip for this repo" / "Skip permanently"
+   - On "Skip permanently" → set `learningConsent: "declined"` in config via Edit tool
+   - On "Install routines + learn" → instruct user to run the PR #4 routines install, then proceed
+
+2. Append to `~/.polyforge/learned-commands.jsonl`:
+   ```bash
+   npx polyforge _ci-learn --project "$(pwd)" --pr {PR_NUMBER}
+   ```
+
+This runs independently from the fix — even if we can't auto-fix, we've at least taught the system.
 
 ### Step 3: Root Cause
 

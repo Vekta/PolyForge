@@ -22,6 +22,7 @@ const commands = {
   help,
   '--version': version,
   '-v': version,
+  // Routines (PR #4)
   '_routine-run': routineRun,
   '_routines-status': routinesStatus,
   '_routines-cleanup': routinesCleanup,
@@ -29,7 +30,264 @@ const commands = {
   '_routines-build-config': routinesBuildConfig,
   '_routines-install-plist': routinesInstallPlist,
   '_routines-uninstall-plist': routinesUninstallPlist,
+  // Dev workflow sync (PR #5 — this branch)
+  '_resolve-default-branch': resolveDefaultBranchCmd,
+  '_parse-workflows': parseWorkflowsCmd,
+  '_detect-parallelism': detectParallelismCmd,
+  '_fetch-jira-statuses': fetchJiraStatusesCmd,
+  '_detect-migrations': detectMigrationsCmd,
+  '_apply-migrations': applyMigrationsCmd,
+  '_jira-transition': jiraTransitionCmd,
+  '_jira-comment': jiraCommentCmd,
+  '_ci-mirror-sync': ciMirrorSyncCmd,
+  '_ci-mirror-run': ciMirrorRunCmd,
+  '_ci-fallback-verbs': ciFallbackVerbsCmd,
+  '_ci-learn': ciLearnCmd,
+  '_parallel-plan': parallelPlanCmd,
+  '_parallel-create-worktrees': parallelCreateWorktreesCmd,
+  '_test-lock-acquire': testLockAcquireCmd,
+  '_test-lock-release': testLockReleaseCmd,
 };
+
+function flag(name) {
+  const i = process.argv.indexOf(name);
+  return i === -1 ? null : process.argv[i + 1];
+}
+
+function positional(index) {
+  return process.argv[3 + index];
+}
+
+async function resolveDefaultBranchCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const { resolveDefaultBranch } = await import('../lib/default-branch.js');
+  const result = resolveDefaultBranch(projectRoot);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function parseWorkflowsCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const defaultBranch = flag('--default-branch') || 'main';
+  const { parseWorkflows } = await import('../lib/workflow-parser.js');
+  const { parseGitlabCI } = await import('../lib/workflow-parser-gitlab.js');
+  const gh = parseWorkflows(projectRoot, { defaultBranch });
+  const gl = parseGitlabCI(projectRoot);
+  console.log(JSON.stringify({ github: gh, gitlab: gl }, null, 2));
+}
+
+async function detectParallelismCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const { detectParallelism } = await import('../lib/parallelism-detector.js');
+  const result = detectParallelism(projectRoot);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function fetchJiraStatusesCmd() {
+  const domain = flag('--domain');
+  const projectKey = flag('--project-key');
+  const email = flag('--email') || process.env.JIRA_EMAIL;
+  const apiToken = process.env.JIRA_API_TOKEN;
+  if (!domain || !projectKey) {
+    console.error('Usage: polyforge _fetch-jira-statuses --domain <d> --project-key <K> [--email <e>]');
+    console.error('  Requires JIRA_API_TOKEN env var (and JIRA_EMAIL if not passed via --email)');
+    process.exit(2);
+  }
+  const { fetchProjectStatuses } = await import('../lib/jira-statuses.js');
+  try {
+    const result = await fetchProjectStatuses({ domain, projectKey, email, apiToken });
+    console.log(JSON.stringify(result, null, 2));
+  } catch (e) {
+    console.log(JSON.stringify({ ok: false, error: e.message }, null, 2));
+    process.exit(1);
+  }
+}
+
+async function detectMigrationsCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.log(JSON.stringify({ migrations: [], reason: 'no polyforge.json' }, null, 2));
+    return;
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const { detectNeededMigrations, applyMigrations, computeDiff, assertConfigClean } = await import('../lib/config/migrator.js');
+  const clean = assertConfigClean(projectRoot);
+  const migrations = detectNeededMigrations(config);
+  const after = applyMigrations(config, migrations);
+  const diff = computeDiff(config, after);
+  console.log(JSON.stringify({ clean, migrations, diff: diff.diff, changed: diff.changed }, null, 2));
+}
+
+async function jiraTransitionCmd() {
+  const domain = flag('--domain');
+  const issueKey = flag('--key');
+  const targetStatus = flag('--status');
+  const comment = flag('--comment');
+  if (!domain || !issueKey || !targetStatus) {
+    console.error('Usage: polyforge _jira-transition --domain <d> --key <K> --status <S> [--comment <text>]');
+    console.error('  Requires JIRA_API_TOKEN and JIRA_EMAIL env vars');
+    process.exit(2);
+  }
+  const { transitionIssue } = await import('../lib/jira-client.js');
+  const result = await transitionIssue({ domain, issueKey, targetStatus, comment });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok || result.noop ? 0 : 1);
+}
+
+async function jiraCommentCmd() {
+  const domain = flag('--domain');
+  const issueKey = flag('--key');
+  const body = flag('--body');
+  if (!domain || !issueKey || !body) {
+    console.error('Usage: polyforge _jira-comment --domain <d> --key <K> --body <text>');
+    process.exit(2);
+  }
+  const { postComment } = await import('../lib/jira-client.js');
+  const result = await postComment(domain, issueKey, body);
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok || result.noop ? 0 : 1);
+}
+
+async function ciMirrorSyncCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const defaultBranch = flag('--default-branch') || 'main';
+  const { syncIfNeeded } = await import('../lib/ci-mirror-sync.js');
+  const result = syncIfNeeded(projectRoot, { defaultBranch });
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function ciMirrorRunCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.error('No polyforge.json, run /forge first');
+    process.exit(2);
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const commands = [
+    ...(config.pipeline?.ciMirror?.commands || []),
+    ...(config.pipeline?.ciMirror?.learnedCommands || []),
+  ];
+  if (commands.length === 0) {
+    const { detectFallbackCommands } = await import('../lib/fallback-verbs.js');
+    const fb = detectFallbackCommands(projectRoot);
+    commands.push(...fb.commands);
+    console.error(`[ci-mirror] no ciMirror.commands — using fallback (detected ${fb.detected.join(', ') || 'none'})`);
+  }
+  const { runCiMirror } = await import('../lib/ci-mirror-runner.js');
+  const result = runCiMirror(commands, { cwd: projectRoot });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok ? 0 : 1);
+}
+
+async function ciFallbackVerbsCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const { detectFallbackCommands } = await import('../lib/fallback-verbs.js');
+  const result = detectFallbackCommands(projectRoot);
+  console.log(JSON.stringify(result, null, 2));
+}
+
+async function ciLearnCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const prNumber = flag('--pr');
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  const config = existsSync(configPath) ? JSON.parse(readFileSync(configPath, 'utf-8')) : {};
+  const userExclude = config?.pipeline?.ciMirror?.excludePatterns || [];
+  const { fetchFailedRunLog, extractFailingCommand, shouldLearn, appendLearnedCommand } = await import('../lib/ci-failure-extractor.js');
+  const fetched = fetchFailedRunLog(projectRoot, prNumber);
+  if (!fetched) {
+    console.log(JSON.stringify({ ok: false, reason: 'no-failed-run-found' }, null, 2));
+    return;
+  }
+  const cmd = extractFailingCommand(fetched.log);
+  if (!cmd) {
+    console.log(JSON.stringify({ ok: false, reason: 'no-command-extracted', runId: fetched.runId }, null, 2));
+    return;
+  }
+  if (!shouldLearn(cmd, userExclude)) {
+    console.log(JSON.stringify({ ok: false, reason: 'excluded-pattern', cmd }, null, 2));
+    return;
+  }
+  if (config?.pipeline?.ciMirror?.learningConsent === 'declined') {
+    console.log(JSON.stringify({ ok: false, reason: 'consent-declined', cmd }, null, 2));
+    return;
+  }
+  const result = appendLearnedCommand({
+    projectRoot,
+    cmd,
+    fromRunUrl: `https://github.com/.../actions/runs/${fetched.runId}`,
+  });
+  console.log(JSON.stringify({ ok: true, cmd, runId: fetched.runId, ...result }, null, 2));
+}
+
+async function parallelPlanCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const kind = flag('--kind') || 'fix';
+  const ticketsRaw = flag('--tickets') || '';
+  const ticketArgs = ticketsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.error('No polyforge.json, run /forge first');
+    process.exit(2);
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const { parseTicketList, planExecution } = await import('../lib/parallel-orchestrator.js');
+  const tickets = parseTicketList(ticketArgs);
+  if (tickets.length === 0) {
+    console.error('No valid tickets parsed from --tickets. Formats: #123 or PROJ-123');
+    process.exit(2);
+  }
+  const plan = await planExecution({ projectRoot, config, tickets, kind });
+  console.log(JSON.stringify(plan, null, 2));
+}
+
+async function parallelCreateWorktreesCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const planJson = flag('--plan');
+  if (!planJson) {
+    console.error('Usage: polyforge _parallel-create-worktrees --project <p> --plan \'[{...}]\'');
+    process.exit(2);
+  }
+  const plan = JSON.parse(planJson);
+  const { createWorktreesForPlan } = await import('../lib/parallel-orchestrator.js');
+  const results = createWorktreesForPlan({ projectRoot, plan });
+  console.log(JSON.stringify(results, null, 2));
+}
+
+async function testLockAcquireCmd() {
+  const owner = flag('--owner') || 'cli';
+  const timeoutMs = Number(flag('--timeout-ms')) || undefined;
+  const { acquireTestLock } = await import('../lib/test-lock.js');
+  const result = await acquireTestLock({ owner, timeoutMs });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.acquired ? 0 : 1);
+}
+
+async function testLockReleaseCmd() {
+  const { releaseTestLock } = await import('../lib/test-lock.js');
+  const released = releaseTestLock();
+  console.log(JSON.stringify({ released }, null, 2));
+}
+
+async function applyMigrationsCmd() {
+  const projectRoot = positional(0) || process.cwd();
+  const configPath = resolve(projectRoot, 'polyforge.json');
+  if (!existsSync(configPath)) {
+    console.error('No polyforge.json found');
+    process.exit(2);
+  }
+  const config = JSON.parse(readFileSync(configPath, 'utf-8'));
+  const { detectNeededMigrations, applyMigrations, atomicWriteConfig, assertConfigClean } = await import('../lib/config/migrator.js');
+  const clean = assertConfigClean(projectRoot);
+  if (!clean.clean) {
+    console.error(`polyforge.json has uncommitted changes. Commit or stash first.\n${clean.status || ''}`);
+    process.exit(3);
+  }
+  const migrations = detectNeededMigrations(config);
+  const next = applyMigrations(config, migrations);
+  atomicWriteConfig(projectRoot, next);
+  console.log(JSON.stringify({ applied: migrations.map(m => m.id), written: true }, null, 2));
+}
 
 const command = process.argv[2] || 'help';
 
