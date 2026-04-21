@@ -37,6 +37,8 @@ const commands = {
   '_fetch-jira-statuses': fetchJiraStatusesCmd,
   '_detect-migrations': detectMigrationsCmd,
   '_apply-migrations': applyMigrationsCmd,
+  '_jira-transition': jiraTransitionCmd,
+  '_jira-comment': jiraCommentCmd,
 };
 
 function flag(name) {
@@ -106,6 +108,36 @@ async function detectMigrationsCmd() {
   const after = applyMigrations(config, migrations);
   const diff = computeDiff(config, after);
   console.log(JSON.stringify({ clean, migrations, diff: diff.diff, changed: diff.changed }, null, 2));
+}
+
+async function jiraTransitionCmd() {
+  const domain = flag('--domain');
+  const issueKey = flag('--key');
+  const targetStatus = flag('--status');
+  const comment = flag('--comment');
+  if (!domain || !issueKey || !targetStatus) {
+    console.error('Usage: polyforge _jira-transition --domain <d> --key <K> --status <S> [--comment <text>]');
+    console.error('  Requires JIRA_API_TOKEN and JIRA_EMAIL env vars');
+    process.exit(2);
+  }
+  const { transitionIssue } = await import('../lib/jira-client.js');
+  const result = await transitionIssue({ domain, issueKey, targetStatus, comment });
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok || result.noop ? 0 : 1);
+}
+
+async function jiraCommentCmd() {
+  const domain = flag('--domain');
+  const issueKey = flag('--key');
+  const body = flag('--body');
+  if (!domain || !issueKey || !body) {
+    console.error('Usage: polyforge _jira-comment --domain <d> --key <K> --body <text>');
+    process.exit(2);
+  }
+  const { postComment } = await import('../lib/jira-client.js');
+  const result = await postComment(domain, issueKey, body);
+  console.log(JSON.stringify(result, null, 2));
+  process.exit(result.ok || result.noop ? 0 : 1);
 }
 
 async function applyMigrationsCmd() {

@@ -28,6 +28,15 @@ curl "https://{domain}.atlassian.net/rest/api/3/issue/{key}" -H "Authorization: 
 
 Read full issue including comments.
 
+### Step 1.5: Pre-start LLM judgment + onStart transition
+
+1. **Actionable check** — is the issue clear enough to fix? If unclear (vague repro, missing context), call `AskUserQuestion` — "Issue #{N} looks unclear because {reason}. What to do?" with options "Proceed (I'll infer)" / "Brainstorm first" / "Skip" / "Other". In parallel mode orchestrator sequentializes.
+2. **Transition onStart** — if `polyforge.json` has `issueTracker.transitions.onStart`:
+   ```bash
+   npx polyforge _jira-transition --domain "{domain}" --key "{KEY}" --status "{transitions.onStart.status}"
+   ```
+   On failure: warn + continue.
+
 ### Step 2: Plan
 
 Search codebase for relevant files (use issue keywords). Understand current behavior before planning.
@@ -39,9 +48,15 @@ Then compact — reload from state file.
 
 ### Step 3: Branch + Implement
 
+Read `isolation.base_branch` from `polyforge.json` (default `main`). Branch off `origin/{base_branch}`:
+
 ```bash
-git checkout -b fix/{issue-number}-{short-description}
+BASE=$(jq -r '.isolation.base_branch // "main"' polyforge.json 2>/dev/null || echo main)
+git fetch origin "$BASE"
+git checkout -b fix/{issue-number}-{short-description} origin/"$BASE"
 ```
+
+**First commit prefixed with `{TICKET-KEY}:` if Jira.**
 
 **Full auto:** Implement directly + write tests. **Semi-auto:** Show diff, then call `AskUserQuestion` with options: "Apply" / "Edit" / "Abort" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
@@ -60,10 +75,33 @@ git reset --soft $(git merge-base HEAD origin/main)
 
 Follow @skills/shared/pr-template-guide.md
 
+**PR body — issue linking rule** :
+- If `TARGET_BRANCH === git.defaultBranch` → `Closes #{N}` (GitHub auto-close works)
+- Otherwise → `Relates to #{N}`
+
 ```bash
 gh pr create --title "fix: {description} (#{issue-number})" --body "..."
 gh issue comment 123 --body "Fix submitted in PR #{pr-number}"
 gh pr checks --watch
 ```
+
+### Step 6: onPrReady transition
+
+```bash
+npx polyforge _jira-transition --domain "{d}" --key "{K}" --status "{transitions.onPrReady.status}"
+```
+
+On failure: warn + continue.
+
+### Step 7: Terminal escalation (when stuck)
+
+If 3 CI-fix retries fail, or the issue is detected mid-work as non-actionable, or user aborts:
+
+```
+AskUserQuestion: "Agent stuck on {TICKET}. Choose:"
+  • Retry / Blocked (transition) / Rejected (transition) / Discuss (brainstorm round)
+```
+
+Blocked / Rejected both use `_jira-transition` with the appropriate status + `--comment "Reason: ..."`. Never auto-decide — always human-in-the-loop.
 
 CI fails → `/fix-ci` automatically. Compact after PR — the PR is the deliverable.
