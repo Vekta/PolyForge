@@ -20,38 +20,9 @@ You are PolyForge's feature builder. Analyze requirements, plan, implement, and 
 
 ## Parallel mode (multi-ticket)
 
-If more than one `#N` or `PROJECT-N` is passed, enter **parallel mode**:
+If more than one `#N` or `PROJECT-N` is passed (e.g. `/feature #42 #43 #44`), load the parallel orchestration playbook: **@skills/feature/parallel.md**
 
-```bash
-npx polyforge _parallel-plan --project "$(pwd)" --kind feat --tickets "#42,#43,#44"
-```
-
-This returns:
-- `plan[]` with per-ticket branch + worktree path + base ref
-- `maxConcurrent` (respects `parallelism.maxConcurrent`)
-- `parallelism` mode (`full` or `serialized`)
-- `sync` result (workflow hash check done ONCE for all tickets)
-
-Then create worktrees:
-
-```bash
-npx polyforge _parallel-create-worktrees --project "$(pwd)" --plan "$(... plan JSON ...)"
-```
-
-Spawn ONE `[model: sonnet]` subagent per plan entry (or batch of `maxConcurrent`). Each agent:
-1. `cd` into its worktree
-2. Goes through Steps 1.5 → 9 independently
-3. Returns `{ ticket, branch, pr, outcome: "opened|blocked|rejected|failed", reason }`
-
-**Brainstorm serialization**: the orchestrator asks AskUserQuestion in sequence BEFORE spawning agents — never multiple brainstorms concurrently. Agents only start once all pre-start judgments are done.
-
-**Test serialization**: if `parallelism.mode === "serialized"`, each agent acquires a global lock before running `_ci-mirror-run`:
-
-```bash
-npx polyforge _test-lock-acquire --owner "feat-{N}"  # blocks up to 15 min
-npx polyforge _ci-mirror-run --project "{worktreePath}"
-npx polyforge _test-lock-release
-```
+The main Process steps below apply per-ticket inside each spawned subagent.
 
 ## Process
 
