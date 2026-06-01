@@ -75,8 +75,25 @@ Create:
 - `polyforge.json` — master config (at repo root, NOT inside `.claude/`)
 - `CLAUDE.md` — short (<200 lines), `@` refs to detailed docs, include PolyForge commands
 - `.claude/rules/` — scoped rules with `paths:` frontmatter
+- `.claude/settings.json` — stack-aware Bash permission allowlist (see below)
 - `docs/CONTEXT.md` — architecture details
 - `tmp/` + `.gitignore` entry
+
+### Permission allowlist (reduces worktree friction)
+
+Worktree sessions (`/review`, `/fix`, `/feature`) often need `ln`/`rm`/`mkdir`/`touch`
+(the vendor-symlink dance) plus the stack's package manager (`composer`, `npm`, `pnpm`, …),
+none of which are in the default `allowedTools`. Compute the recommended set from the
+Phase 1 detection JSON and **offer** to write it — never write silently:
+
+```bash
+npx polyforge _recommend-allowlist --project "$(pwd)" --detection '{detection JSON from Phase 1}'
+```
+
+This prints `patterns[]` (dry-run, nothing written). Show the patterns, then call
+`AskUserQuestion`: "Add these Bash permissions to `.claude/settings.json`?" — options:
+"Add them (Recommended)" / "Skip" / "Other". On "Add them", re-run with `--write`. The
+merge is non-destructive: existing `permissions.allow` entries and unrelated keys are kept.
 
 The generated `polyforge.json` includes a new **`schemaVersion: "1.1.0"`** stamp and these new sections derived from Phase 1b:
 
