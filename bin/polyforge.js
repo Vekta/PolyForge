@@ -2,7 +2,7 @@
 
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { existsSync, mkdirSync, symlinkSync, readlinkSync, unlinkSync, readFileSync, readdirSync, statSync, lstatSync } from 'fs';
+import { existsSync, mkdirSync, symlinkSync, readlinkSync, unlinkSync, readFileSync, writeFileSync, readdirSync, statSync, lstatSync } from 'fs';
 import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -47,6 +47,7 @@ const commands = {
   '_parallel-create-worktrees': parallelCreateWorktreesCmd,
   '_test-lock-acquire': testLockAcquireCmd,
   '_test-lock-release': testLockReleaseCmd,
+  '_recommend-allowlist': recommendAllowlistCmd,
 };
 
 function flag(name) {
@@ -80,6 +81,38 @@ async function detectParallelismCmd() {
   const { detectParallelism } = await import('../lib/parallelism-detector.js');
   const result = detectParallelism(projectRoot);
   console.log(JSON.stringify(result, null, 2));
+}
+
+async function recommendAllowlistCmd() {
+  const projectRoot = flag('--project') || process.cwd();
+  const detectionRaw = flag('--detection');
+  let detection = {};
+  if (detectionRaw) {
+    try {
+      detection = JSON.parse(detectionRaw);
+    } catch {
+      console.error('--detection must be valid JSON');
+      process.exit(2);
+    }
+  }
+  const { recommendedAllowlist, mergeIntoSettings } = await import('../lib/permission-allowlist.js');
+  const patterns = recommendedAllowlist(detection);
+  const settingsPath = resolve(projectRoot, '.claude', 'settings.json');
+  let existing = {};
+  if (existsSync(settingsPath)) {
+    try {
+      existing = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+    } catch {
+      existing = {};
+    }
+  }
+  const merged = mergeIntoSettings(existing, patterns);
+  const write = process.argv.includes('--write');
+  if (write) {
+    mkdirSync(dirname(settingsPath), { recursive: true });
+    writeFileSync(settingsPath, `${JSON.stringify(merged, null, 2)}\n`);
+  }
+  console.log(JSON.stringify({ patterns, settingsPath, written: write, settings: merged }, null, 2));
 }
 
 async function fetchJiraStatusesCmd() {
