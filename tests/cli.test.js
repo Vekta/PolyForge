@@ -100,6 +100,13 @@ describe('rule files', () => {
       assert.ok(existsSync(rulePath), `Missing: rules/${rule}`);
     });
   }
+
+  it('golden-principles.md forbids useless inline comments', () => {
+    const content = readFileSync(resolve(ROOT, 'rules', 'golden-principles.md'), 'utf-8');
+    assert.match(content, /inline `\/\/` comments/, 'should name the inline-comment anti-pattern');
+    assert.match(content, /why.*never.*what/i, 'should state comments explain why, not what');
+    assert.match(content, /doc-comment idiom/, 'should prefer the doc-comment idiom over inline chatter');
+  });
 });
 
 describe('templates', () => {
