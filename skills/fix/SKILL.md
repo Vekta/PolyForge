@@ -68,6 +68,8 @@ git checkout -b fix/{issue-number}-{short-description} origin/"$BASE"
 
 **Independent file groups (>3 files):** Delegate each group to `[model: sonnet]` subagent. Returns: `{ "group": "", "files": [], "summary": "" }`
 
+**One ticket = one PR.** Implement the whole fix — every phase — in this single branch/PR. Phases are commit boundaries, not separate PRs; never propose splitting one ticket across PRs. See @skills/shared/common-patterns.md § "One Ticket = One PR".
+
 ### Step 4: Verify — CI mirror pre-push
 
 ```bash
@@ -81,6 +83,8 @@ On failure: auto-fix loop (max 3 retries). Still failing → Step 7 (Terminal es
 Fallback verbs (package.json/composer.json/go.mod/etc.) kick in if no CI config detected.
 
 ### Step 5: Clean Up + PR
+
+All phases land in this one PR — re-group the work into clean atomic commits (the phasing unit), not multiple PRs.
 
 ```bash
 git reset --soft $(git merge-base HEAD origin/main)
