@@ -109,6 +109,23 @@ describe('rule files', () => {
   });
 });
 
+describe('one ticket = one PR principle', () => {
+  it('common-patterns.md declares the principle and the narrow exceptions', () => {
+    const content = readFileSync(resolve(ROOT, 'skills', 'shared', 'common-patterns.md'), 'utf-8');
+    assert.match(content, /One Ticket = One PR/, 'should declare the principle');
+    assert.match(content, /commit boundaries, not PR boundaries/, 'phases map to commits');
+    assert.match(content, /Narrow exceptions/, 'should define narrow exceptions');
+    assert.match(content, /parallel mode is unaffected/i, 'should exempt multi-ticket parallel mode');
+  });
+
+  for (const skill of ['feature', 'fix']) {
+    it(`${skill}/SKILL.md references the one-ticket-one-PR principle`, () => {
+      const content = readFileSync(resolve(ROOT, 'skills', skill, 'SKILL.md'), 'utf-8');
+      assert.match(content, /One ticket = one PR/i, `${skill} should state the principle`);
+    });
+  }
+});
+
 describe('templates', () => {
   it('CLAUDE.md template exists', () => {
     assert.ok(existsSync(resolve(ROOT, 'templates', 'CLAUDE.md.template')));

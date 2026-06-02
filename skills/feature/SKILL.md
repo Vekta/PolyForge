@@ -55,6 +55,8 @@ Before committing to an implementation path:
 
 Search codebase for similar features — follow existing patterns. Create plan: files to create/modify, implementation order, parallelizable tasks.
 
+**One ticket = one PR.** Plan every phase to land in the single PR created in Step 7 — phases are commit boundaries, not separate PRs. Never propose splitting this one ticket across multiple PRs. See @skills/shared/common-patterns.md § "One Ticket = One PR".
+
 **Preview mode (`--preview`):** Stop here. Call `AskUserQuestion` with options: "Implement" / "Adjust" / "Cancel" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 Save plan to `tmp/state-{issue}.json`: `{ "issue", "layers": [], "completed": [], "branch": "" }`
@@ -74,7 +76,7 @@ git checkout -b feat/{issue-number}-{short-description} origin/"$BASE"
 
 ### Step 4: Implement
 
-Build layer by layer: Schema → Core → API/Interface → Tests → Documentation. Commit after each logical unit.
+Build layer by layer: Schema → Core → API/Interface → Tests → Documentation. Commit after each logical unit — all layers land in this one branch/PR (layer = commit, ticket = PR).
 
 **Over 3 files per layer:** Delegate to `[model: sonnet]` subagent per layer. Subagent commits and returns summary as JSON: `{ "layer": "", "files": [], "summary": "" }`. Update state file after each layer.
 

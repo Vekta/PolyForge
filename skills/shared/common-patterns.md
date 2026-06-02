@@ -1,5 +1,28 @@
 # Shared Patterns
 
+## One Ticket = One PR
+
+A single ticket is implemented end-to-end in **one branch and one PR**. A single
+agent writes the whole ticket in one session — same author, same context — so
+splitting it across PRs adds pure overhead (N branches, N descriptions, N CI runs,
+forced stacking on cross-phase dependencies) and reduces nothing: it's the identical
+code reorganized across branches.
+
+- **Phases/layers are commit boundaries, not PR boundaries.** Preserve reviewability
+  with clean, logically-grouped atomic commits inside the one PR.
+- **Never proactively propose splitting one ticket into multiple PRs.** Do not offer a
+  "how many PRs?" choice.
+- **Genuine ambiguity still pauses** via the Step 1.5 actionable check / `AskUserQuestion`
+  — ask only when the ticket is truly unclear, never to pick a PR count.
+- **Multi-ticket parallel mode is unaffected.** `/feature #42 #43 #44` is legitimately
+  many tickets → many PRs (one per ticket). This rule governs a *single* ticket.
+
+**Narrow exceptions** (split one ticket only when one genuinely applies — and even then
+surface it as a real decision via `AskUserQuestion`, never as the default):
+- Phases ship to users independently / behind separate rollout gates.
+- A phase is independently revertable/deployable and incremental rollout is explicitly wanted.
+- Different owners are assigned to different phases.
+
 ## User Questions — AskUserQuestion ONLY
 
 **Every interactive question in every PolyForge skill MUST use the `AskUserQuestion` tool.** No exceptions.
