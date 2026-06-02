@@ -1,24 +1,20 @@
----
-name: routines-manage
-description: Use when the user wants to list, suspend, resume, delete, manually run, or promote-from-dry a PolyForge routine. Also for pause-all / resume-all emergency controls.
----
 
-# /routines-manage — Manage Routines
+# /embers tend — Manage Routines
 
 Dispatcher for CRUD operations on installed routines.
 
 ## Usage
 
 ```
-/routines-manage                              List all routines + status
-/routines-manage list                         Same as above
-/routines-manage suspend <name>               Disable a routine (keep plist)
-/routines-manage resume <name>                Re-enable a routine
-/routines-manage delete <name>                Remove plist + config entry
-/routines-manage run-now <name> [--dry]       Run immediately (bypass schedule+window, NOT preflight)
-/routines-manage pause-all                    Create ~/.polyforge/PAUSE
-/routines-manage resume-all                   Remove ~/.polyforge/PAUSE
-/routines-manage promote-from-dry <name>      Flip first_run_dry=false after reviewing dry run
+/embers tend                              List all routines + status
+/embers tend list                         Same as above
+/embers tend suspend <name>               Disable a routine (keep plist)
+/embers tend resume <name>                Re-enable a routine
+/embers tend delete <name>                Remove plist + config entry
+/embers tend run-now <name> [--dry]       Run immediately (bypass schedule+window, NOT preflight)
+/embers tend pause-all                    Create ~/.polyforge/PAUSE
+/embers tend resume-all                   Remove ~/.polyforge/PAUSE
+/embers tend promote-from-dry <name>      Flip first_run_dry=false after reviewing dry run
 ```
 
 ## Subcommand details

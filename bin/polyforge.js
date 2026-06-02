@@ -511,16 +511,20 @@ Usage:
   npx polyforge --version             Show version
   npx polyforge help                  Show this help
 
-After install, use these slash commands in Claude Code:
-  /forge            Scan & configure current project
-  /review          Review a PR, issue, or Jira ticket
-  /analyse-db      Analyze database schema
-  /analyse-code    Full codebase analysis
-  /report-issue    Detect & report issues
-  /fix             Fix a specific issue
-  /fix-ci          Diagnose & fix CI failures (max 3 retries)
-  /brainstorm      Brainstorm a feature or fix
-  /generate-doc    Generate Claude-optimized documentation
+After install, use these forge-themed slash commands in Claude Code:
+  /forge            Set up / configure PolyForge for a project
+  /smith            Implement a ticket end-to-end (auto feat/fix) — was /feature + /fix
+  /quench           Drive CI to green / stabilize the build — was /fix-ci
+  /hallmark         Review a PR, issue, or Jira ticket — was /review
+  /assay            Whole-codebase quality audit → report — was /analyse-code
+  /blueprint        Map & document the DB schema — was /analyse-db
+  /sketch           Plan / explore before building — was /brainstorm
+  /probe            Root-cause one defect / exception — was /diagnose
+  /mark             Record a defect in the tracker — was /report-issue
+  /engrave          Write / refresh docs & context — was /generate-doc
+  /temper           Set a project rule / constraint — was /add-rule
+  /fold             Consolidate commit history — was /squash
+  /embers           Nocturnal routines: light | cast | watch | tend — was /routines-*
 `);
 }
 

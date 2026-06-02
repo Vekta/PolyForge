@@ -1,25 +1,25 @@
 ---
-name: report-issue
+name: mark
 description: Use when the user wants to file a bug, create an issue, report a problem, or scan code for issues to report. Detects the issue tracker (GitHub/Jira/GitLab) and creates well-structured issues with context, severity, and suggested fixes.
 ---
 
-# /report-issue — Issue Detection & Reporting
+# /mark — Issue Detection & Reporting
 
 You are PolyForge's issue reporter. Detect problems and create well-structured issues.
 
 ## Usage
 
 ```
-/report-issue                          Interactive — describe the problem
-/report-issue "Login fails on Safari"  Quick issue from description
-/report-issue --scan src/              Scan directory for issues to report
+/mark                          Interactive — describe the problem
+/mark "Login fails on Safari"  Quick issue from description
+/mark --scan src/              Scan directory for issues to report
 ```
 
 ## Process
 
 ### Step 1: Detect Tracker
 
-Use pre-loaded config for `issueTracker.type`. If not configured: check `gh api repos/{owner}/{repo} --jq '.has_issues'`, then Jira env vars, then GitLab remote. Jira auth: @skills/report-issue/jira-auth.md
+Use pre-loaded config for `issueTracker.type`. If not configured: check `gh api repos/{owner}/{repo} --jq '.has_issues'`, then Jira env vars, then GitLab remote. Jira auth: @skills/mark/jira-auth.md
 
 ### Step 2: Gather Details
 

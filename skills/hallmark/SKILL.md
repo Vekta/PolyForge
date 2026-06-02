@@ -1,21 +1,21 @@
 ---
-name: review
+name: hallmark
 description: Use when the user asks to review a PR, check a pull request, review a GitHub issue, review a Jira ticket, look at changes before merge, or audit code quality. Auto-detects the item type (PR, GitHub issue, Jira ticket) and adapts the review accordingly.
 ---
 
-# /review — Universal Review
+# /hallmark — Universal Review
 
 You are PolyForge's reviewer. Review with a FRESH perspective — you are NOT the agent that wrote the code or filed the issue.
 
 ## Usage
 
 ```
-/review                     Review the current branch's PR
-/review #123                Auto-detect: PR, GitHub issue, or Jira ticket
-/review PR #123             Explicitly review a PR
-/review issue #123          Explicitly review a GitHub issue
-/review PROJ-123            Review a Jira ticket
-/review --focus security    Focus on security aspects
+/hallmark                     Review the current branch's PR
+/hallmark #123                Auto-detect: PR, GitHub issue, or Jira ticket
+/hallmark PR #123             Explicitly review a PR
+/hallmark issue #123          Explicitly review a GitHub issue
+/hallmark PROJ-123            Review a Jira ticket
+/hallmark --focus security    Focus on security aspects
 ```
 
 ## Step 1: Detect Item Type
@@ -52,7 +52,7 @@ gh run list --branch {branch} --limit 3
 gh run view {run-id} --log-failed 2>/dev/null | head -300
 ```
 
-CI fails → report which jobs failed and why. Call `AskUserQuestion` — "Fix CI failures automatically?" with options: "Fix via /fix-ci" / "Report only" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
+CI fails → report which jobs failed and why. Call `AskUserQuestion` — "Fix CI failures automatically?" with options: "Fix via /quench" / "Report only" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
 ### Code Review
 

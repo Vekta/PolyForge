@@ -34,7 +34,7 @@ This routine is **read-only** on logs — it produces a markdown report only.
 - PR #124: patch-version-bump (lodash 4.17.20 → 4.17.21)
 
 ## Flagged
-- 12 active worktrees (threshold 10) — consider /polyforge-routines-logs --worktrees
+- 12 active worktrees (threshold 10) — consider /embers watch --worktrees
 - rate-limited until {ts} because ...
 
 ## Raw

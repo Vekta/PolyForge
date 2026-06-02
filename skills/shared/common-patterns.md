@@ -14,7 +14,7 @@ code reorganized across branches.
   "how many PRs?" choice.
 - **Genuine ambiguity still pauses** via the Step 1.5 actionable check / `AskUserQuestion`
   — ask only when the ticket is truly unclear, never to pick a PR count.
-- **Multi-ticket parallel mode is unaffected.** `/feature #42 #43 #44` is legitimately
+- **Multi-ticket parallel mode is unaffected.** `/smith #42 #43 #44` is legitimately
   many tickets → many PRs (one per ticket). This rule governs a *single* ticket.
 
 **Narrow exceptions** (split one ticket only when one genuinely applies — and even then
@@ -110,8 +110,8 @@ Read `project.stack`, `project.testFrameworks`, and `project.linters` from pre-l
 
 Run **all** matching tools — a project can have both ESLint and TypeScript, or PHPStan and PHPCS. Fix failures automatically (max 2 retries). Same error + same approach twice → switch strategy. After 3 total attempts, categorize:
 - 🟢 Quick fix → fix now
-- 🟡 Needs investigation → `/report-issue`
-- 🔴 Pre-existing/infra → `/report-issue` tagged infra
+- 🟡 Needs investigation → `/mark`
+- 🔴 Pre-existing/infra → `/mark` tagged infra
 
 ## Circuit Breaker
 

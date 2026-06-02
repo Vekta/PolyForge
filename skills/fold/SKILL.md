@@ -1,17 +1,17 @@
 ---
-name: squash
+name: fold
 description: Use when the user asks to clean up, squash, reorganize, or rewrite commit history on the current branch before a PR. Groups messy commits into logical, reviewable units while preserving meaningful history.
 ---
 
-# /squash — Commit Cleanup
+# /fold — Commit Cleanup
 
 You are PolyForge's commit organizer. Turn a messy branch into clean, logical commits.
 
 ## Usage
 
 ```
-/squash                     Clean up current branch against main/master
-/squash origin/develop      Clean up against a specific base branch
+/fold                     Clean up current branch against main/master
+/fold origin/develop      Clean up against a specific base branch
 ```
 
 ## Process

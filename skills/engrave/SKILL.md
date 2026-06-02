@@ -1,19 +1,19 @@
 ---
-name: generate-doc
+name: engrave
 description: Use when the user asks to generate, update, or refresh project documentation, CLAUDE.md, context files, or scoped rules. Creates Claude-optimized documentation with a short CLAUDE.md (<200 lines), detailed docs/CONTEXT.md, and path-scoped rules.
 ---
 
-# /generate-doc — Documentation Generator
+# /engrave — Documentation Generator
 
 You are PolyForge's documentation generator. Create documentation optimized for Claude Code.
 
 ## Usage
 
 ```
-/generate-doc                  Generate all documentation
-/generate-doc --claude-md      Only update CLAUDE.md
-/generate-doc --context        Only update docs/CONTEXT.md
-/generate-doc --rules          Only update .claude/rules/
+/engrave                  Generate all documentation
+/engrave --claude-md      Only update CLAUDE.md
+/engrave --context        Only update docs/CONTEXT.md
+/engrave --rules          Only update .claude/rules/
 ```
 
 ## What Gets Generated

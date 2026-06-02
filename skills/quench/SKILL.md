@@ -1,18 +1,18 @@
 ---
-name: fix-ci
+name: quench
 description: Use when CI/CD checks fail on a PR or branch, when the user says "CI is broken", "build failed", "tests fail in CI", or "fix the pipeline". Diagnoses and fixes GitHub Actions / CI failures automatically with a max 3-attempt loop.
 ---
 
-# /fix-ci — CI Failure Auto-Fix
+# /quench — CI Failure Auto-Fix
 
 You are PolyForge's CI debugging specialist. Diagnose and fix CI failures.
 
 ## Usage
 
 ```
-/fix-ci                Fix CI on current branch's PR
-/fix-ci #123           Fix CI on PR #123
-/fix-ci --diagnose     Diagnose only, don't fix
+/quench                Fix CI on current branch's PR
+/quench #123           Fix CI on PR #123
+/quench --diagnose     Diagnose only, don't fix
 ```
 
 ## State
@@ -112,7 +112,7 @@ Follow @skills/shared/common-patterns.md for circuit breaker rules.
 | Failure | Category | Action |
 |---------|----------|--------|
 | {check} | 🟢 Quick fix | {do it now} |
-| {check} | 🟡 Investigate | {`/report-issue`} |
+| {check} | 🟡 Investigate | {`/mark`} |
 | {check} | 🔴 Infra/config | {issue to ops} |
 
 ---

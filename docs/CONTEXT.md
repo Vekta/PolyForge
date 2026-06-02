@@ -102,11 +102,11 @@ description: Use when <trigger condition>. <what it does>.
 ---
 ```
 
-The `name` field maps to the slash command (e.g., `name: fix-ci` → `/fix-ci`). The `description` is the text Claude Code uses to match user intent to the correct skill. All descriptions start with "Use when" followed by natural-language trigger phrases.
+The `name` field maps to the slash command (e.g., `name: fix-ci` → `/quench`). The `description` is the text Claude Code uses to match user intent to the correct skill. All descriptions start with "Use when" followed by natural-language trigger phrases.
 
 ### Skill loading at install
 
-During `polyforge install`, each skill directory (e.g., `skills/fix-ci/`) is symlinked as `~/.claude/skills/polyforge-fix-ci`. The entire directory is linked — Claude Code reads `SKILL.md` from within it.
+During `polyforge install`, each skill directory (e.g., `skills/quench/`) is symlinked as `~/.claude/skills/polyforge-quench`. The entire directory is linked — Claude Code reads `SKILL.md` from within it.
 
 ### Shared resources
 
@@ -131,7 +131,7 @@ Several skills spawn subagents for expensive work. The conventions are:
 
 ### Autonomy modes
 
-Skills that modify code (`/feature`, `/fix`) respect a project-level autonomy setting from `.claude/polyforge.json`:
+Skills that modify code (`/smith`, `/smith`) respect a project-level autonomy setting from `.claude/polyforge.json`:
 - `"full"` — implement directly without showing diffs
 - `"semi"` — show diff preview per layer and ask "Continue? (y/n/edit)" before applying
 
@@ -155,18 +155,18 @@ All skills follow the circuit breaker from `common-patterns.md`:
 | Slash command | Skill directory | Purpose |
 |---|---|---|
 | `/forge` | `init/` | Initialize or reconfigure PolyForge for a project |
-| `/feature` | `feature/` | Implement a feature from an issue number or description |
-| `/fix` | `fix/` | Fix a bug from an issue number |
-| `/fix-ci` | `fix-ci/` | Diagnose and fix CI failures (max 3 attempt loop) |
-| `/review` | `review/` | Review a PR, GitHub issue, or Jira ticket |
-| `/report-issue` | `report-issue/` | Create structured issues on GitHub, GitLab, or Jira |
-| `/brainstorm` | `brainstorm/` | Free-form exploration → structured action plan |
-| `/diagnose` | `diagnose/` | Root-cause investigation of an error or unexpected behavior |
-| `/analyse-code` | `analyse-code/` | Full codebase quality audit → `docs/ANALYSIS-{date}.md` |
-| `/analyse-db` | `analyse-db/` | Database schema documentation → `docs/DB.md` |
-| `/generate-doc` | `generate-doc/` | Regenerate `CLAUDE.md`, `docs/CONTEXT.md`, and scoped rules |
-| `/squash` | `squash/` | Reorganize branch commits into 3-7 logical groups |
-| `/add-rule` | `add-rule/` | Add scoped rules to `.claude/rules/` without re-running /forge |
+| `/smith` | `feature/` | Implement a feature from an issue number or description |
+| `/smith` | `fix/` | Fix a bug from an issue number |
+| `/quench` | `fix-ci/` | Diagnose and fix CI failures (max 3 attempt loop) |
+| `/hallmark` | `review/` | Review a PR, GitHub issue, or Jira ticket |
+| `/mark` | `report-issue/` | Create structured issues on GitHub, GitLab, or Jira |
+| `/sketch` | `brainstorm/` | Free-form exploration → structured action plan |
+| `/probe` | `diagnose/` | Root-cause investigation of an error or unexpected behavior |
+| `/assay` | `analyse-code/` | Full codebase quality audit → `docs/ANALYSIS-{date}.md` |
+| `/blueprint` | `analyse-db/` | Database schema documentation → `docs/DB.md` |
+| `/engrave` | `generate-doc/` | Regenerate `CLAUDE.md`, `docs/CONTEXT.md`, and scoped rules |
+| `/fold` | `squash/` | Reorganize branch commits into 3-7 logical groups |
+| `/temper` | `add-rule/` | Add scoped rules to `.claude/rules/` without re-running /forge |
 
 ---
 
@@ -182,9 +182,9 @@ Three rule files in `rules/` are installed into `~/.claude/rules/` and apply glo
 
 ### Project-scoped rules
 
-`/forge` and `/add-rule` create rule files under `.claude/rules/` in the project directory. These use `paths:` frontmatter to scope rules to specific file patterns (e.g., backend files, test files). Naming convention: `polyforge-{scope}.md` (e.g., `polyforge-backend.md`, `polyforge-tests.md`).
+`/forge` and `/temper` create rule files under `.claude/rules/` in the project directory. These use `paths:` frontmatter to scope rules to specific file patterns (e.g., backend files, test files). Naming convention: `polyforge-{scope}.md` (e.g., `polyforge-backend.md`, `polyforge-tests.md`).
 
-Rules are written as positive assertions, one per numbered line. `/add-rule` appends to existing files and never overwrites.
+Rules are written as positive assertions, one per numbered line. `/temper` appends to existing files and never overwrites.
 
 ---
 
@@ -217,7 +217,7 @@ Four shell scripts in `hooks/` are provided for use as git hooks or Claude Code 
 - Pipe filter: accepts CI log output on stdin, outputs only error/failure lines
 - Matches: `error`, `Error`, `ERROR`, `FAIL`, `FAILED`, `fatal`, `Fatal`, `FATAL`, `panic`, `Panic`, `exception`, `Exception`
 - Caps at 200 lines
-- Used by `/fix-ci` as: `gh run view <id> --log-failed 2>/dev/null | head -300`
+- Used by `/quench` as: `gh run view <id> --log-failed 2>/dev/null | head -300`
 
 ---
 
@@ -279,7 +279,7 @@ The CLI is a single ESM file with no external dependencies. It uses only Node.js
 ### Symlink naming
 
 All installed entries use the `polyforge-` prefix:
-- `skills/fix-ci/` → `~/.claude/skills/polyforge-fix-ci`
+- `skills/quench/` → `~/.claude/skills/polyforge-quench`
 - `rules/security.md` → `~/.claude/rules/polyforge-security.md`
 
 Entries that already have the `polyforge-` prefix are not double-prefixed.

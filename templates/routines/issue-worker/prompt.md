@@ -14,7 +14,7 @@ Your mission: pick ONE open, unassigned, actionable GitHub issue and deliver a w
 Once an issue is chosen:
 
 1. Post a comment: "🌙 Picked up by PolyForge issue-worker routine — branch `{current-branch}`"
-2. Call `/polyforge-feature #{number}` if available, OR run the classic pipeline:
+2. Call `/polyforge-smith #{number}` if available, OR run the classic pipeline:
    - Read issue body + acceptance criteria from comments
    - Search codebase for similar features
    - Implement minimal, focused changes
