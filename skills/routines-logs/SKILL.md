@@ -25,16 +25,24 @@ Render a markdown report:
 # Routines Report — {date}
 
 ## Rolling 5h telemetry
-Runs: {N} | Total tokens: {in+out} | Cost ref: ${cost}
+Runs: {N} | Total tokens: {in+out} | Cache hit rate: {pct}% | Cost ref: ${cost}
 
 ## By routine (last 24h)
-| Routine | Runs | Success | Failures | Last | Tokens |
-|---|---|---|---|---|---|
+| Routine | Runs | Success | Failures | Last | Tokens | Cache hit | Skipped |
+|---|---|---|---|---|---|---|---|
 
 ## Rate limit: {status}
 ## Pause file: {present/absent}
 ## Active worktrees: {count} (warn if >10)
+## Cost regressions: {list any `cost-regression` events — routine, ratio vs baseline}
 ```
+
+**Cache hit rate** comes from `summary().cacheHitRate` (and per-routine
+`byRoutine[name].cacheHitRate`) — the fraction of input tokens served from cache.
+A low/zero rate across the nightly window means routines aren't sharing a warm
+cache; check whether their schedules fall within one cache TTL. **Skipped** counts
+`skip` events with `reason: "no-work"`. **Cost regressions** are `cost-regression`
+events emitted when a run costs ≥1.5× the routine's rolling average.
 
 Data sources (assemble via Read + bash):
 - `~/.polyforge/logs/*.jsonl` — per-routine events
