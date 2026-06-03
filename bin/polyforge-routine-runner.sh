@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PolyForge routine runner — invoked by launchd or manually via /polyforge-routines-manage run-now
+# PolyForge routine runner — invoked by launchd or manually via /embers tend run-now
 # Usage: polyforge-routine-runner.sh <routine-name> <project-root> [--dry] [--run-now]
 set -euo pipefail
 
