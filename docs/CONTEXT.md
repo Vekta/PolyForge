@@ -39,19 +39,19 @@ polyforge/
 ├── bin/
 │   └── polyforge.js          # CLI entry point
 ├── skills/
-│   ├── add-rule/SKILL.md
-│   ├── analyse-code/SKILL.md
-│   ├── analyse-db/SKILL.md
-│   ├── brainstorm/SKILL.md
-│   ├── diagnose/SKILL.md
-│   ├── feature/SKILL.md
-│   ├── fix/SKILL.md
-│   ├── fix-ci/SKILL.md
-│   ├── generate-doc/SKILL.md
-│   ├── init/SKILL.md          # invoked as /forge
-│   ├── review/SKILL.md
-│   ├── report-issue/SKILL.md
-│   ├── squash/SKILL.md
+│   ├── assay/SKILL.md            # /assay
+│   ├── blueprint/SKILL.md        # /blueprint
+│   ├── embers/SKILL.md           # /embers (light/cast/watch/tend sub-procedures)
+│   ├── engrave/SKILL.md          # /engrave
+│   ├── fold/SKILL.md             # /fold
+│   ├── hallmark/SKILL.md         # /hallmark
+│   ├── init/SKILL.md             # invoked as /forge
+│   ├── mark/SKILL.md             # /mark
+│   ├── probe/SKILL.md            # /probe
+│   ├── quench/SKILL.md           # /quench
+│   ├── sketch/SKILL.md           # /sketch
+│   ├── smith/SKILL.md            # /smith (merges former feature + fix)
+│   ├── temper/SKILL.md           # /temper
 │   └── shared/
 │       ├── common-patterns.md
 │       ├── issue-default.md
@@ -155,18 +155,18 @@ All skills follow the circuit breaker from `common-patterns.md`:
 | Slash command | Skill directory | Purpose |
 |---|---|---|
 | `/forge` | `init/` | Initialize or reconfigure PolyForge for a project |
-| `/smith` | `feature/` | Implement a feature from an issue number or description |
-| `/smith` | `fix/` | Fix a bug from an issue number |
-| `/quench` | `fix-ci/` | Diagnose and fix CI failures (max 3 attempt loop) |
-| `/hallmark` | `review/` | Review a PR, GitHub issue, or Jira ticket |
-| `/mark` | `report-issue/` | Create structured issues on GitHub, GitLab, or Jira |
-| `/sketch` | `brainstorm/` | Free-form exploration → structured action plan |
-| `/probe` | `diagnose/` | Root-cause investigation of an error or unexpected behavior |
-| `/assay` | `analyse-code/` | Full codebase quality audit → `docs/ANALYSIS-{date}.md` |
-| `/blueprint` | `analyse-db/` | Database schema documentation → `docs/DB.md` |
-| `/engrave` | `generate-doc/` | Regenerate `CLAUDE.md`, `docs/CONTEXT.md`, and scoped rules |
-| `/fold` | `squash/` | Reorganize branch commits into 3-7 logical groups |
-| `/temper` | `add-rule/` | Add scoped rules to `.claude/rules/` without re-running /forge |
+| `/smith` | `smith/` | Implement a ticket end-to-end — auto-classifies feat vs fix (merges former `feature/` + `fix/`) |
+| `/quench` | `quench/` | Diagnose and fix CI failures (max 3 attempt loop) |
+| `/hallmark` | `hallmark/` | Review a PR, GitHub issue, or Jira ticket |
+| `/mark` | `mark/` | Create structured issues on GitHub, GitLab, or Jira |
+| `/sketch` | `sketch/` | Free-form exploration → structured action plan |
+| `/probe` | `probe/` | Root-cause investigation of an error or unexpected behavior |
+| `/assay` | `assay/` | Full codebase quality audit → `docs/ANALYSIS-{date}.md` |
+| `/blueprint` | `blueprint/` | Database schema documentation → `docs/DB.md` |
+| `/engrave` | `engrave/` | Regenerate `CLAUDE.md`, `docs/CONTEXT.md`, and scoped rules |
+| `/fold` | `fold/` | Reorganize branch commits into 3-7 logical groups |
+| `/temper` | `temper/` | Add scoped rules to `.claude/rules/` without re-running /forge |
+| `/embers` | `embers/` | Nocturnal routines: `light` / `cast` / `watch` / `tend` (merges former `routines-*`) |
 
 ---
 
