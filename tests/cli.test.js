@@ -30,9 +30,10 @@ describe('polyforge CLI', () => {
     const output = run(['help']);
     assert.match(output, /Usage/);
     assert.match(output, /\/forge/);
-    assert.match(output, /\/review/);
-    assert.match(output, /\/fix/);
-    assert.match(output, /\/brainstorm/);
+    assert.match(output, /\/hallmark/);
+    assert.match(output, /\/smith/);
+    assert.match(output, /\/sketch/);
+    assert.match(output, /\/embers/);
   });
 
   it('rejects unknown commands', () => {
@@ -60,9 +61,9 @@ describe('polyforge CLI', () => {
   it('lists available skills', () => {
     const output = run(['list']);
     assert.match(output, /init/);
-    assert.match(output, /review/);
-    assert.match(output, /fix/);
-    assert.match(output, /brainstorm/);
+    assert.match(output, /hallmark/);
+    assert.match(output, /smith/);
+    assert.match(output, /sketch/);
   });
 
   it('warns on unknown skill name in add-skill', () => {
@@ -72,7 +73,7 @@ describe('polyforge CLI', () => {
 });
 
 describe('skill files', () => {
-  const skillDirs = ['init', 'review', 'analyse-db', 'report-issue', 'feature', 'fix', 'fix-ci', 'brainstorm', 'analyse-code', 'generate-doc', 'squash', 'add-rule', 'diagnose'];
+  const skillDirs = ['init', 'hallmark', 'blueprint', 'mark', 'smith', 'quench', 'sketch', 'assay', 'engrave', 'fold', 'temper', 'probe', 'embers'];
 
   for (const skill of skillDirs) {
     it(`${skill}/SKILL.md exists`, () => {
@@ -118,12 +119,10 @@ describe('one ticket = one PR principle', () => {
     assert.match(content, /parallel mode is unaffected/i, 'should exempt multi-ticket parallel mode');
   });
 
-  for (const skill of ['feature', 'fix']) {
-    it(`${skill}/SKILL.md references the one-ticket-one-PR principle`, () => {
-      const content = readFileSync(resolve(ROOT, 'skills', skill, 'SKILL.md'), 'utf-8');
-      assert.match(content, /One ticket = one PR/i, `${skill} should state the principle`);
-    });
-  }
+  it('smith/SKILL.md references the one-ticket-one-PR principle', () => {
+    const content = readFileSync(resolve(ROOT, 'skills', 'smith', 'SKILL.md'), 'utf-8');
+    assert.match(content, /One ticket = one PR/i, 'smith should state the principle');
+  });
 });
 
 describe('templates', () => {

@@ -1,4 +1,4 @@
-You are the PolyForge **learning-consolidator** routine. You run once a night to aggregate CI commands learned by `/fix-ci` across all PolyForge projects on this machine, then open a config PR per project.
+You are the PolyForge **learning-consolidator** routine. You run once a night to aggregate CI commands learned by `/quench` across all PolyForge projects on this machine, then open a config PR per project.
 
 ## Execution
 
@@ -17,7 +17,7 @@ You are the PolyForge **learning-consolidator** routine. You run once a night to
       - If new entries is empty, skip this project
       - Append new entries to `learnedCommands[]`, preserving every other field untouched
       - Atomic write `polyforge.json` (tmp + rename)
-   g. Commit: `chore: learn CI commands from /fix-ci runs ({count} new)`
+   g. Commit: `chore: learn CI commands from /quench runs ({count} new)`
    h. Push the branch and open PR with:
       - Title: `chore: learned CI commands ({date})`
       - Body: list of new commands with source links

@@ -1,18 +1,18 @@
 ---
-name: diagnose
+name: probe
 description: Use when the user asks to investigate, diagnose, analyze, or understand a specific problem — an exception, error, unexpected behavior, log entry, or stack trace. Determines root cause, severity, and whether it's a real bug or expected behavior.
 ---
 
-# /diagnose — Problem Investigation
+# /probe — Problem Investigation
 
 You are PolyForge's diagnostician. Investigate a problem and determine root cause.
 
 ## Usage
 
 ```
-/diagnose "NullPointerException in UserService"
-/diagnose                                         Interactive — paste error
-/diagnose --file src/services/auth.go:142         Investigate specific location
+/probe "NullPointerException in UserService"
+/probe                                         Interactive — paste error
+/probe --file src/services/auth.go:142         Investigate specific location
 ```
 
 ## Process
@@ -59,6 +59,6 @@ You are PolyForge's diagnostician. Investigate a problem and determine root caus
 
 ### Step 5: Actions
 
-Call `AskUserQuestion` — "Next action?" with options: "Create issue (/report-issue)" / "Fix now (/fix)" / "Write reproducing test" / "Not a bug" / "Investigate deeper" / "Other".
+Call `AskUserQuestion` — "Next action?" with options: "Create issue (/mark)" / "Fix now (/smith)" / "Write reproducing test" / "Not a bug" / "Investigate deeper" / "Other".
 
 Compact after diagnosis — the verdict is the deliverable.

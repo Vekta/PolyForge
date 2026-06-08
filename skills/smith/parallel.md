@@ -1,15 +1,15 @@
-# /feature — Parallel mode (multi-ticket)
+# /smith — Parallel mode (multi-ticket)
 
-Loaded only when `/feature` is invoked with more than one ticket ref. Keep this file focused on the parallel orchestration — the Process steps (1.5 → 9) live in the main `SKILL.md`.
+Loaded only when `/smith` is invoked with more than one ticket ref. Keep this file focused on the parallel orchestration — the Process steps (1.5 → 9) live in the main `SKILL.md`. Each ticket auto-classifies feat vs fix for its own commits/PR (Step 1.5).
 
 ## Trigger
 
-If the invocation has ≥2 `#N` or `PROJECT-N` refs (e.g. `/feature #42 #43 #44` or `/feature DEV-12 DEV-13`), enter parallel mode.
+If the invocation has ≥2 `#N` or `PROJECT-N` refs (e.g. `/smith #42 #43 #44` or `/smith DEV-12 DEV-13`), enter parallel mode.
 
 ## Plan
 
 ```bash
-npx polyforge _parallel-plan --project "$(pwd)" --kind feat --tickets "#42,#43,#44"
+npx polyforge _parallel-plan --project "$(pwd)" --kind smith --tickets "#42,#43,#44"
 ```
 
 Returns:

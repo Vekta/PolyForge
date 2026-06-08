@@ -63,7 +63,7 @@ Sequence (one AskUserQuestion call each, wait for answer before the next):
 4. Autonomy — options: "Full auto (recommended)" / "Semi-auto" / "Other"
 5. (Full auto only) File access — options: "Grant full access" / "Decline" / "Other"
 6. **Parallelism mode** — detector proposed `{suggestedMode}` because `{reasons}`. Options: "Use {suggestedMode} (Recommended)" / "Force full parallel" / "Force serialized" / "Other". If `pnpmWarning` present, mention it in the question context.
-7. **Jira transitions** (Jira only, 4 sequential questions) — for each of `onStart`, `onPrReady`, `onBlocked`, `onReject`: "Target status for {transition} ?" with options from the statuses list returned by `_fetch-jira-statuses`. If Jira creds missing, skip these and store `transitions: null` (transitions disabled, no-op in /fix /feature).
+7. **Jira transitions** (Jira only, 4 sequential questions) — for each of `onStart`, `onPrReady`, `onBlocked`, `onReject`: "Target status for {transition} ?" with options from the statuses list returned by `_fetch-jira-statuses`. If Jira creds missing, skip these and store `transitions: null` (transitions disabled, no-op in /smith /smith).
 8. Additional conventions — options: "None" / "Describe" / "Other"
 9. Generate docs now — options: "Yes" / "Skip" / "Other"
 
@@ -81,7 +81,7 @@ Create:
 
 ### Permission allowlist (reduces worktree friction)
 
-Worktree sessions (`/review`, `/fix`, `/feature`) often need `ln`/`rm`/`mkdir`/`touch`
+Worktree sessions (`/hallmark`, `/smith`, `/smith`) often need `ln`/`rm`/`mkdir`/`touch`
 (the vendor-symlink dance) plus the stack's package manager (`composer`, `npm`, `pnpm`, …),
 none of which are in the default `allowedTools`. Compute the recommended set from the
 Phase 1 detection JSON and **offer** to write it — never write silently:

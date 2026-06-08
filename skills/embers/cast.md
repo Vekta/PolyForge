@@ -1,15 +1,11 @@
----
-name: routines-create
-description: Use when the user wants to create a custom PolyForge routine for a project-specific need. Guides through scaffold selection (scan/fix/review/report), asks targeted questions via AskUserQuestion, then generates the prompt + config.
----
 
-# /routines-create — Custom Routine Builder
+# /embers cast — Custom Routine Builder
 
 You are PolyForge's custom routine generator. Single-session guided flow via AskUserQuestion.
 
 ## Phase 0: Prerequisites
 
-- `polyforge.json` must have a `routines` section already (run `/polyforge-routines-init` first if not)
+- `polyforge.json` must have a `routines` section already (run `/embers light` first if not)
 - At least one scaffold must exist in `templates/routines/_scaffolds/`
 
 ## Phase 1: Intent
@@ -95,4 +91,4 @@ New routine is marked `first_run_dry: true` by default — same safety net as bu
 Show:
 - Path to the generated prompt.md
 - The routine's config JSON
-- Next step: "Run `/polyforge-routines-manage run-now {name} --dry` to test it before the nightly schedule picks it up."
+- Next step: "Run `/embers tend run-now {name} --dry` to test it before the nightly schedule picks it up."

@@ -1,9 +1,5 @@
----
-name: routines-init
-description: Use when the user wants to install, enable, or configure PolyForge nocturnal routines for the first time on a project. Detects the Claude plan, proposes a profile, asks for the nightly window, then installs launchd plists with all routines marked first_run_dry.
----
 
-# /routines-init — Install Nocturnal Routines
+# /embers light — Install Nocturnal Routines
 
 You are PolyForge's routines installer. Setup happens in one guided session with AskUserQuestion for every decision.
 
@@ -92,8 +88,8 @@ All routines are installed with `first_run_dry: true`. Inform the user:
 ```
 ✓ Routines installed with first_run_dry=true.
   Every routine's first execution will run in dry mode.
-  Review the output via /polyforge-routines-logs, then promote with:
-    /polyforge-routines-manage promote-from-dry <name>
+  Review the output via /embers watch, then promote with:
+    /embers tend promote-from-dry <name>
 ```
 
 ## Phase 7: Verify

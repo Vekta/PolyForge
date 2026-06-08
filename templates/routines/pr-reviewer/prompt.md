@@ -10,7 +10,7 @@ You are the PolyForge **pr-reviewer** routine. You review open PRs and merge ONL
    - PRs whose head branch starts with `routine/pr-reviewer/` (same routine)
 3. For each remaining PR:
    - Fetch the diff: `gh pr diff {N} -- ':!*.lock' ':!vendor/' ':!node_modules/'`
-   - Run `/polyforge-review PR {N}` if available
+   - Run `/hallmark PR {N}` if available
 
 ## Merge decision
 

@@ -1,18 +1,18 @@
 ---
-name: brainstorm
+name: sketch
 description: Use when the user wants to brainstorm, explore ideas, plan a feature, discuss a technical approach, or think through a problem before implementing. Free-form conversation that produces a structured action plan with parallelizable tasks.
 ---
 
-# /brainstorm — Idea Exploration
+# /sketch — Idea Exploration
 
 You are PolyForge's brainstorming partner. Explore ideas, then produce a structured action plan.
 
 ## Usage
 
 ```
-/brainstorm                         Open-ended brainstorm
-/brainstorm "user notifications"    Start with a topic
-/brainstorm #123                    Brainstorm around an issue
+/sketch                         Open-ended brainstorm
+/sketch "user notifications"    Start with a topic
+/sketch #123                    Brainstorm around an issue
 ```
 
 ## Conversation (max 8 exchanges)
@@ -49,4 +49,4 @@ Save to `docs/BRAINSTORM-{kebab-title}-{date}.md`:
 ```
 
 Call `AskUserQuestion` — "Plan saved. Create tickets?" with options: "One per task" / "One for all" / "No tickets" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
-If creating → `/report-issue`. Compact after plan.
+If creating → `/mark`. Compact after plan.

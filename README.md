@@ -26,48 +26,51 @@ This symlinks PolyForge skills and rules into `~/.claude/`, making them availabl
 2. If your project already has a `.claude/` directory with custom commands or skills, back it up first (`mv .claude .claude-backup`) — `/forge` will recreate it cleanly
 3. Open Claude Code in your project
 4. Run `/forge` — PolyForge scans your project and generates an optimized configuration
-5. Use any command: `/review`, `/fix #123`, `/brainstorm`, etc.
+5. Use any command: `/hallmark`, `/smith #123`, `/sketch`, etc.
 
 ## Commands
 
+PolyForge speaks one voice — a **blacksmith / forge** theme. One craft verb per command.
+
 ### Core workflow
 
-| Command | Description |
-|---------|-------------|
-| `/forge` | Scan project, detect stack/architecture/CI workflows/parallelism, generate config interactively |
-| `/review` | Review a PR, GitHub issue, or Jira ticket — checks CI, quality, security |
-| `/feature #N [#M ...]` | Build a feature from an issue — plan, implement, run CI mirror locally, transition tickets, PR. Supports multi-ticket parallel execution via git worktrees |
-| `/fix #N [#M ...]` | Fix an issue — branch, implement, CI mirror, transition tickets, PR. Same parallel support |
-| `/fix-ci` | Diagnose and fix CI/CD failures — max 3 retries. Learns unmirrored CI commands via informed-consent flow |
-| `/brainstorm` | Free-form brainstorming — produces action plan with parallelizable tasks |
-| `/generate-doc` | Generate/update Claude-optimized documentation |
-| `/squash` | Clean up commit history before PR |
-| `/add-rule` | Add project rules or conventions without re-running `/forge` |
-| `/report-issue` | Detect and create issues on GitHub/Jira/GitLab |
-| `/analyse-db` | Connect to DB, generate `docs/DB.md` schema documentation |
-| `/analyse-code` | Full codebase analysis — patterns, security, performance, config issues |
-| `/diagnose` | Investigate a specific error or behavior — determine root cause |
+| Command | Replaces | Description |
+|---------|----------|-------------|
+| `/forge` | — | Scan project, detect stack/architecture/CI workflows/parallelism, generate config interactively |
+| `/smith #N [#M ...]` | `/feature` + `/fix` | Implement a ticket end-to-end — auto-classifies feature vs fix for the commit/PR prefix (override with `--feat`/`--fix`). Plan, implement, run CI mirror locally, transition tickets, one PR. Multi-ticket → parallel worktrees |
+| `/quench` | `/fix-ci` | Drive CI to green — diagnose and fix CI/CD failures, max 3 retries. Learns unmirrored CI commands via informed-consent flow |
+| `/hallmark` | `/review` | Review a PR, GitHub issue, or Jira ticket and stamp it — checks CI, quality, security |
+| `/assay` | `/analyse-code` | Whole-codebase quality audit — patterns, security, performance, config issues |
+| `/blueprint` | `/analyse-db` | Connect to DB, generate `docs/DB.md` schema documentation |
+| `/sketch` | `/brainstorm` | Plan / explore before building — produces an action plan with parallelizable tasks |
+| `/probe` | `/diagnose` | Root-cause one specific error or behavior |
+| `/mark` | `/report-issue` | Record a defect in the tracker — GitHub/Jira/GitLab |
+| `/engrave` | `/generate-doc` | Write / refresh Claude-optimized documentation |
+| `/temper` | `/add-rule` | Set a project rule or convention without re-running `/forge` |
+| `/fold` | `/squash` | Consolidate commit history before PR |
 
-### Nocturnal routines
+> **Note:** `/feature` + `/fix` are merged into a single `/smith` (one ticket = one PR; the prefix is auto-classified). This is a clean rename — the old command names no longer resolve, but natural-language invocation ("implement #42", "fix the CI") still works via each command's description.
 
-Autonomous workflows that run during your sleep window to exploit unused Claude subscription quota:
+### Nocturnal routines — `/embers`
 
-| Command | Description |
-|---------|-------------|
-| `/routines-init` | Install nocturnal routines: detects your Claude plan, proposes a profile (light/standard/full/unleashed), installs launchd plists |
-| `/routines-create` | Scaffold-guided creator for custom routines (scan / fix / review / report templates) |
-| `/routines-manage` | `list / suspend / resume / delete / run-now / pause-all / promote-from-dry` |
-| `/routines-logs` | Read-only inspection of logs, telemetry, rate-limit state, worktrees |
+Autonomous overnight work = the banked **embers** that keep the forge working after hours. They run during your sleep window to exploit unused Claude subscription quota:
 
-See `docs/ROUTINES.md` for the nocturnal routines quickstart and `docs/DEV-WORKFLOW-SYNC.md` for ticket transitions / CI mirror / parallel fix deep-dive.
+| Command | Replaces | Description |
+|---------|----------|-------------|
+| `/embers light` | `/routines-init` | Install nocturnal routines: detects your Claude plan, proposes a profile (light/standard/full/unleashed), installs launchd plists |
+| `/embers cast` | `/routines-create` | Scaffold-guided creator for custom routines (scan / fix / review / report templates) |
+| `/embers watch` | `/routines-logs` | Read-only inspection of logs, telemetry, rate-limit state, worktrees |
+| `/embers tend` | `/routines-manage` | `list / suspend / resume / delete / run-now / pause-all / promote-from-dry` |
+
+See `docs/ROUTINES.md` for the nocturnal routines quickstart and `docs/DEV-WORKFLOW-SYNC.md` for ticket transitions / CI mirror / parallel deep-dive.
 
 ### Dev workflow integration
 
-`/fix` and `/feature` integrate with your project's real workflow:
+`/smith` integrates with your project's real workflow:
 
 - **Ticket transitions** — Jira tickets move through `In Progress` → `Code Review` automatically. Terminal decisions (Blocked / Rejected) always require human confirmation via AskUserQuestion
-- **CI mirror** — before each push, PolyForge runs your actual CI commands locally (extracted from `.github/workflows/*.yml`) with a 3-retry auto-fix loop. Unmirrored CI commands are learned via `/fix-ci`
-- **Parallel processing** — `/fix #10 #11 #12` spawns isolated worktrees, orchestrator serializes user prompts, test execution can be gated by a global lock for projects with shared services (detected automatically)
+- **CI mirror** — before each push, PolyForge runs your actual CI commands locally (extracted from `.github/workflows/*.yml`) with a 3-retry auto-fix loop. Unmirrored CI commands are learned via `/quench`
+- **Parallel processing** — `/smith #10 #11 #12` spawns isolated worktrees (one PR per ticket), orchestrator serializes user prompts, test execution can be gated by a global lock for projects with shared services (detected automatically)
 
 ## How It Works
 
@@ -122,8 +125,8 @@ Install everything or pick what you need:
 ```bash
 npx polyforgeai install                  # Install all skills & rules
 npx polyforgeai install --force          # Reinstall, overwriting existing
-npx polyforgeai add-skill review fix     # Install specific skills only
-npx polyforgeai remove-skill analyse-db  # Remove a skill
+npx polyforgeai add-skill hallmark smith # Install specific skills only
+npx polyforgeai remove-skill blueprint   # Remove a skill
 npx polyforgeai list                     # See available skills & install status
 ```
 

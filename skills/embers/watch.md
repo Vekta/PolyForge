@@ -1,20 +1,16 @@
----
-name: routines-logs
-description: Use when the user wants to inspect PolyForge routine execution logs, token consumption, rate-limit status, or stuck/accumulating worktrees. Reads JSONL logs and telemetry without invoking any runtime.
----
 
-# /routines-logs — Inspect Routine Logs
+# /embers watch — Inspect Routine Logs
 
 Read-only inspection of routine state.
 
 ## Usage
 
 ```
-/routines-logs                            Summary of last 24h
-/routines-logs <name>                     Detailed log for one routine (last 50 events)
-/routines-logs --window 5h                Telemetry for rolling 5h window
-/routines-logs --worktrees                List active routine worktrees
-/routines-logs --errors                   Last 10 errors across all routines
+/embers watch                            Summary of last 24h
+/embers watch <name>                     Detailed log for one routine (last 50 events)
+/embers watch --window 5h                Telemetry for rolling 5h window
+/embers watch --worktrees                List active routine worktrees
+/embers watch --errors                   Last 10 errors across all routines
 ```
 
 ## Default view (no args)
@@ -56,7 +52,7 @@ Telemetry summary available via:
 npx polyforge _routines-status
 ```
 
-## Detail view: `/routines-logs <name>`
+## Detail view: `/embers watch <name>`
 
 ```bash
 tail -n 50 ~/.polyforge/logs/{name}.jsonl | jq -c '.'
@@ -68,7 +64,7 @@ Render a chronological summary of the last 50 events, highlighting:
 - `rate-limited`
 - `error`
 
-## Errors view: `/routines-logs --errors`
+## Errors view: `/embers watch --errors`
 
 Grep across all `*.jsonl` for `"type":"error"` | `"is_error":true` | `"preflight-fail"`, render top 10 most recent.
 
@@ -90,4 +86,4 @@ Renders tokens + cost per routine for the rolling 5h window.
 
 ## Notes
 
-This skill never mutates state — purely read-only. Use `/polyforge-routines-manage` to change state.
+This skill never mutates state — purely read-only. Use `/embers tend` to change state.

@@ -9,13 +9,13 @@ Nocturnal autonomous workflows that use your Claude subscription quota while you
 npx polyforge install
 
 # In Claude Code, configure routines for the current project:
-/polyforge-routines-init
+/embers light
 
 # Inspect what's installed:
-/polyforge-routines-logs
+/embers watch
 
 # Everything starts in dry-run; promote after review:
-/polyforge-routines-manage promote-from-dry deps-security
+/embers tend promote-from-dry deps-security
 ```
 
 ## How it works
@@ -67,10 +67,10 @@ Budget defaults per profile (USD equivalent per run):
 
 | Command | Purpose |
 |---|---|
-| `/polyforge-routines-init` | First-time setup for a project |
-| `/polyforge-routines-create` | Build a custom routine via guided scaffold |
-| `/polyforge-routines-manage` | `list / suspend / resume / delete / run-now / pause-all / promote-from-dry` |
-| `/polyforge-routines-logs` | Inspect logs, telemetry, worktrees (read-only) |
+| `/embers light` | First-time setup for a project |
+| `/embers cast` | Build a custom routine via guided scaffold |
+| `/embers tend` | `list / suspend / resume / delete / run-now / pause-all / promote-from-dry` |
+| `/embers watch` | Inspect logs, telemetry, worktrees (read-only) |
 
 ## Built-in routines
 
@@ -150,7 +150,7 @@ A marker at `~/.polyforge/rate-limited-until.json` prevents subsequent runs unti
 
 ### Worktrees accumulating
 
-`/polyforge-routines-logs --worktrees` lists them. Cleanup runs daily but only removes when the associated PR has been closed/merged for ≥3 days. If a PR has been abandoned, close it via GitHub and wait for the next cleanup cycle, or manually `git worktree remove <path>`.
+`/embers watch --worktrees` lists them. Cleanup runs daily but only removes when the associated PR has been closed/merged for ≥3 days. If a PR has been abandoned, close it via GitHub and wait for the next cleanup cycle, or manually `git worktree remove <path>`.
 
 ### A routine ran but I can't find its PR
 
@@ -158,7 +158,7 @@ Check `~/.polyforge/logs/{routine}.jsonl` — the `claude-result` event carries 
 
 ### Promote-from-dry blew up
 
-After reviewing a dry run, promote with `/polyforge-routines-manage promote-from-dry <name>`. If you're unsure, you can always `suspend` instead and leave it disabled.
+After reviewing a dry run, promote with `/embers tend promote-from-dry <name>`. If you're unsure, you can always `suspend` instead and leave it disabled.
 
 ## Out of scope (v1)
 

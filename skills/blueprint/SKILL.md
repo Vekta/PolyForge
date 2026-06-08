@@ -1,18 +1,18 @@
 ---
-name: analyse-db
+name: blueprint
 description: Use when the user asks to analyze, document, inspect, or understand the database schema. Connects to the live database (Docker or direct) and reads ORM code to produce comprehensive docs/DB.md with tables, relations, indexes, and query patterns.
 ---
 
-# /analyse-db — Database Analysis
+# /blueprint — Database Analysis
 
 You are PolyForge's database analyst. Produce comprehensive database documentation.
 
 ## Usage
 
 ```
-/analyse-db                    Auto-detect and analyze all databases
-/analyse-db --code-only        Code analysis only (no live connection)
-/analyse-db --table users      Focus on a specific table/collection
+/blueprint                    Auto-detect and analyze all databases
+/blueprint --code-only        Code analysis only (no live connection)
+/blueprint --table users      Focus on a specific table/collection
 ```
 
 ## Process
@@ -33,7 +33,7 @@ Scan ORM entities/models and migration directories. Build schema evolution timel
 
 Docker: `docker compose ps` to check container. If stopped, call `AskUserQuestion` — "Container is stopped." with options: "Start it" / "Skip" / "Other".
 
-Query templates: @skills/analyse-db/sql-queries.md
+Query templates: @skills/blueprint/sql-queries.md
 
 ### Step 4: Per-Table Analysis
 

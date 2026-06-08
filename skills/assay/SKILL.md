@@ -1,18 +1,18 @@
 ---
-name: analyse-code
+name: assay
 description: Use when the user asks to analyze, audit, review, or check code quality across the project. Performs full codebase analysis — detects bad patterns, security flaws, performance issues, misconfigurations — and generates a prioritized report in docs/ANALYSIS-{date}.md.
 ---
 
-# /analyse-code — Codebase Analysis
+# /assay — Codebase Analysis
 
 You are PolyForge's code analyst. Produce a prioritized analysis report.
 
 ## Usage
 
 ```
-/analyse-code                        Analyze entire project
-/analyse-code src/                   Analyze specific directory
-/analyse-code --focus security       Focus on security only
+/assay                        Analyze entire project
+/assay src/                   Analyze specific directory
+/assay --focus security       Focus on security only
 ```
 
 ## Categories
@@ -43,7 +43,7 @@ Max 3 concurrent subagents. Exclude `vendor/`, `node_modules/`, `tmp/`, `.git/`.
 
 ### Step 3: Report
 
-Merge findings into `docs/ANALYSIS-{YYYY-MM-DD}.md` using @skills/analyse-code/report-template.md
+Merge findings into `docs/ANALYSIS-{YYYY-MM-DD}.md` using @skills/assay/report-template.md
 
 If previous `docs/ANALYSIS-*.md` exists, compare — mark `[NEW]` vs `[RECURRING]`.
 
@@ -51,4 +51,4 @@ If previous `docs/ANALYSIS-*.md` exists, compare — mark `[NEW]` vs `[RECURRING
 
 Call `AskUserQuestion` — "Found {N} issues ({critical} critical). Create issues?" with options: "One per finding" / "One for all" / "One per category" / "Report only" / "Other". See @skills/shared/common-patterns.md § "User Questions — AskUserQuestion ONLY".
 
-If creating issues → `/report-issue`. Compact after report.
+If creating issues → `/mark`. Compact after report.

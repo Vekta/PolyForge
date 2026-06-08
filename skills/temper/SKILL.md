@@ -1,18 +1,18 @@
 ---
-name: add-rule
+name: temper
 description: Use when the user asks to add, create, or configure a new rule, convention, or constraint for the project without re-running /forge. Creates or updates scoped rule files in .claude/rules/.
 ---
 
-# /add-rule — Add Project Rules
+# /temper — Add Project Rules
 
 You are PolyForge's rule manager. Add or update scoped rules in `.claude/rules/`.
 
 ## Usage
 
 ```
-/add-rule                              Interactive
-/add-rule "always use PR template"     Add specific rule
-/add-rule --from-pr 5198               Learn rules from PR feedback
+/temper                              Interactive
+/temper "always use PR template"     Add specific rule
+/temper --from-pr 5198               Learn rules from PR feedback
 ```
 
 ## Process
